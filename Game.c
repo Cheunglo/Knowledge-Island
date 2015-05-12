@@ -883,23 +883,29 @@ int getExchangeRate (Game g, int player,
     assert (disciplineFrom != STUDENT_THD);
 
     //paths to different retraining centres
-    path training;
+    path training1, training2;
     int rate;
 
     if (disciplineFrom == STUDENT_MTV) {
-        strcpy (training, TV);
+        strcpy (training1, TV1);
+        strcpy (training2, TV2);
     } else if (disciplineFrom == STUDENT_MMONEY) {
-        strcpy (training, MONEY);
+        strcpy (training1, MONEY1);
+        strcpy (training2, MONEY2);
     } else if (disciplineFrom == STUDENT_BPS) {
-        strcpy (training, ENGINEER);
+        strcpy (training1, ENGINEER1);
+        strcpy (training2, ENGINEER2);
     } else if (disciplineFrom == STUDENT_BQN) {
-        strcpy (training, SCIENCE);
+        strcpy (training1, SCIENCE1);
+        strcpy (training2, SCIENCE2);
     } else {
-        strcpy (training, JOB);
+        strcpy (training1, JOB1);
+        strcpy (training2, JOB2);
     }
 
     //NB player = ARC code e.g. player 1/(UNI_A) = ARC_A
-    if (getARC (g, training) == player) {
+    if ((getCampus (g, training1) == player) || \
+    	(getCampus (g, training2) == player)) {
         rate = 2;
     } else {
         rate = 3;
