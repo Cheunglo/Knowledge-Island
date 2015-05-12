@@ -14,7 +14,8 @@
 #define RIGHT 'R'
 #define BACK 'B' 
 #define NUM_DIRECTIONS 6
-#define COORD 7 //Number of coordinates in x, y, z plane, -3to3
+//Number of coordinates in x, y, z plane, -3to3
+#define COORD 7 
 #define REGIONCOORD 6
 
 //Maximum values of items
@@ -53,15 +54,6 @@
 #define SCIENCE2 "RLLRLRLRR"    //BQN2 retraining centre
 #define JOB1 "RLLRLRRLRL"       //MJOBS1 retraining centre
 #define JOB2 "RLLRLRRLRLR"       //MJOBS2 retraining centre
-   
-
-#define DEFAULT_DISCIPLINES {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ, \
-                STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV, \
-                STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,    \
-                STUDENT_MJ, STUDENT_BQN, STUDENT_THD, STUDENT_MJ,     \
-                STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS }
-
-#define DEFAULT_DICE {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5}
 
 typedef struct _boardCoord {
 	//Coordinates of the board
@@ -115,25 +107,21 @@ typedef struct _game {
     player uni[NUM_UNIS];       
 } game;
 
-int cmpsConditions (Game g, action a, int player);
-int G08Conditions (Game g, action a, int player);
-int arcConditions (Game g, action a, int player);
-int spinoffConditions (Game g, action a, int player);
-int retrainConditions (Game g, action a, int player);
 void initializeBoard (Game g);
 void makeRegion (Game g, int discipline[]);
 void makeArc (Game g, char * path, int player);
 void makeCampus (Game g, char * path, int player);
 void makeG08 (Game g, char * path, int player);
 void addStudents (int regionID);
+int cmpsConditions (Game g, action a, int player);
+int G08Conditions (Game g, action a, int player);
+int arcConditions (Game g, action a, int player);
+int spinoffConditions (Game g, action a, int player);
+int retrainConditions (Game g, action a, int player);
 int rollDice (void);
+int *checkCampRegion (Game g, int x, int y, int z);
 coord pathMovement (char * path);
 coord movement (coord point, char move); //single movements only
-
-int main (int argc, char *argv []) {
-	printf ("Entering Main!");
-	return EXIT_SUCCESS;
-}
 
 // Creates a new game and intialises the game board
 // and player resources
@@ -188,7 +176,9 @@ Game newGame (int discipline[], int dice[]) {
 
 //Initializes the board for newGame()
 void initializeBoard (Game g) {
+	
 	makeRegion();
+	
 	//For player 1 UNI_A
 	g->gameBoard.campus[2][5][0] = UNI_A;
 	char * path;
@@ -226,8 +216,8 @@ void initializeBoard (Game g) {
 	g->gameBoard.arc[2][3][6][0][2][5] = UNI_C;
 	g->gameBoard.arc[0][2][5][1][4][6] = UNI_C;
 	g->gameBoard.arc[1][4][6][0][2][5] = UNI_C;
-/*
-	//Initializing retraining center
+
+/*	//Initializing retraining center
 	g->gameBoard.retraining[1][1][5][2][3][6] = STUDENT_BPS;
 	g->gameBoard.retraining[2][3][6][1][1][5] = STUDENT_BPS;
 	g->gameBoard.retraining[5][1][1][6][2][3] = STUDENT_BQN;
@@ -279,7 +269,6 @@ void makeAction (Game g, action a) {
         g->uni[curPlayer].numStudents[STUDENT_MMONEY] -= 3;
 
         makeG08 (g, a.destination, curPlayer);
-
         g->uni[curPlayer].numCmps--;
         g->uni[curPlayer].numG08s++;
 
@@ -292,7 +281,7 @@ void makeAction (Game g, action a) {
         g->uni[curPlayer].numArcs++;
 		
 		//change mostArcs
-		if(g->mostArcs == NO_ONE){
+		if (g->mostArcs == NO_ONE) {
 			g->mostArcs = curPlayer;
 		}
 		else if(g->uni[curPlayer].numArcs > g->uni[g->mostArcs].numArcs){
@@ -303,7 +292,7 @@ void makeAction (Game g, action a) {
         g->uni[curPlayer].numPubs++;
 		
 		//change mostPubs
-		if(g->mostPubs == NO_ONE){
+		if (g->mostPubs == NO_ONE) {
 			g->mostPubs = curPlayer;
 		}
 		else if(g->uni[curPlayer].numPubs > g->uni[g->mostPubs].numPubs){
@@ -356,6 +345,133 @@ void throwDice (Game g, int diceScore) {
     }
 }
 
+//Stores region data in gameboard
+void makeRegion (Game g, int discipline[]) {
+
+	g->gameBoard.region[1][5][3] = 0;
+	g->gameBoard.region[1][4][4] = 1;
+	g->gameBoard.region[1][3][5] = 2;
+
+	g->gameBoard.region[2][5][2] = 3;
+	g->gameBoard.region[2][4][3] = 4;
+	g->gameBoard.region[2][3][4] = 5;
+	g->gameBoard.region[2][2][5] = 6;
+
+	g->gameBoard.region[3][5][1] = 7;
+	g->gameBoard.region[3][4][2] = 8;
+	g->gameBoard.region[3][3][3] = 9;
+	g->gameBoard.region[3][2][4] = 10;
+	g->gameBoard.region[3][1][5] = 11;
+
+	g->gameBoard.region[4][4][1] = 12;
+	g->gameBoard.region[4][3][2] = 13;
+	g->gameBoard.region[4][2][3] = 14;
+	g->gameBoard.region[4][1][4] = 15;
+
+	g->gameBoard.region[5][3][1] = 16;
+	g->gameBoard.region[5][2][2] = 17;
+	g->gameBoard.region[5][1][3] = 18;
+}
+
+//Creates an ARC in given board
+void makeArc (Game g, char * path, int player) {
+
+	int xPtA = 0;
+	int yPtA = 0;
+	int zPtA = 0;
+	int xPtB = 0;
+	int yPtB = 0;
+	int zPtB = 0;
+	edge arc;
+	arc.pointA = pathMovement (path);
+	arc.pointB = movement (arc.pointA, BACK);
+
+	xPtA = arc.pointA.x + 3;
+	yPtA = arc.pointA.y + 3;
+	zPtA = arc.pointA.z + 3;
+	xPtB = arc.pointB.x + 3;
+	yPtB = arc.pointB.y + 3;
+	zPtB = arc.pointB.z + 3;
+	g->gameBoard.arc[xPtA][yPtA][zPtA][xPtB][yPtB][zPtB] = player;
+	g->gameBoard.arc[xPtB][yPtB][zPtB][xPtA][yPtA][zPtA] = player;
+}
+
+//Stores campus data in gameboard 
+void makeCampus (Game g, char * path, int player) {
+
+	int xArray = 0;
+	int yArray = 0;
+	int zArray = 0;
+	coord movedPoint;
+
+	movedPoint = pathMovement (path);
+	assert (abs(movedPoint.x+movedPoint.y+movedPoint.z) == 2);
+	//Save the player code into the array
+	xArray = movedPoint.x + 3;
+	yArray = movedPoint.y + 3;
+	zArray = movedPoint.z + 3;
+	g->gameBoard.campus[xArray][yArray][zArray] = player;
+
+}
+
+//Stores G08 data in gameboard 
+void makeG08 (Game g, char * path, int player) {
+
+	int xArray = 0;
+	int yArray = 0;
+	int zArray = 0;
+	coord movedPoint;
+
+	movedPoint = pathMovement (path);
+	//Save the player code into the array
+	xArray = movedPoint.x + 3;
+	yArray = movedPoint.y + 3;
+	zArray = movedPoint.z + 3;
+	//Since it's 4, 5, 6 for a GO8
+	g->gameBoard.campus[xArray][yArray][zArray] = player+3;
+}
+
+void addStudents (int regionID) {
+
+    int i = 0;
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    int curPlayer = UNI_A-1;
+    int curVertex = g->gameBoard.campus[x][y][z];
+    int *regionSurround = checkCampRegion (Game g, int x, int y, int z);
+    
+    while (x < 6) {
+    	while (y < 6) {
+    		while (z < 6) {
+                curVertex = g->gameBoard.campus[x][y][z];
+    			if (curVertex > 0) {
+                    regionSurround = checkCampRegion (g, x, y, z);
+                    i = 0;
+                    while (i < 3 && regionSurround[i] == regionID) {
+                        //mod curVertex by 4 to obtain value between 0-2
+                        //since curVertex is 1-6
+                        curPlayer = curVertex % 4;
+                        if (curVertex >= 1 && curVertex <= 3) {
+                            g->uni[curPlayer].numStudents[getDiscipline[regionID]]++;
+                        } else if (curVertex >= 4 && curVertex <= 6) {
+                            g->uni[curPlayer].numStudents[getDiscipline[regionID]] += 2;
+                        }
+                        i++;
+                    }
+                }
+                z++;
+    		}
+            z = 0;
+            y++;
+    	}
+        y = 0;
+        x++;
+    }
+    
+    free (regionSurround);
+}
+
 
 // what type of students are produced by the specified region?
 // regionID is the index of the region in the newGame arrays (above)
@@ -376,15 +492,6 @@ int getDiceValue (Game g, int regionID) {
     diceValue = g->regionDice[regionID];
     return diceValue;
 }
-
-int rollDice (void) {
-
-    int diceValue = 0;
-    diceValue = (rand()%6 + 1) + (rand()%6 + 1);
-
-    return diceValue;
-}
-
 
 //Returns TRUE/FALSE on whether action is legal or not
 int isLegalAction (Game g, action a) {
@@ -424,42 +531,6 @@ int isLegalAction (Game g, action a) {
 	}
 
 	return output;
-}
-
-//Function returns the KPI points of specified player
-int getKPIpoints (Game g, int player) {
-
-	int kpiPoints = 0;
-	
-	//Add KPI points from every object player owns
-	kpiPoints += g->uni[player].numArcs * ARCPTS;
-	kpiPoints += g->uni[player].numCmps * CAMPUSPTS;
-	kpiPoints += g->uni[player].numG08s * G08PTS;
-	kpiPoints += g->uni[player].numIPs * IPPTS;
-
-	//Conditions for prestige KPI points
-	if (player == g->mostArcs) {
-		kpiPoints += MOSTARCPTS;
-	} 
-
-	if (player == g->mostPubs) {
-		kpiPoints += MOSTPUBPTS;
-	}
-
-	return kpiPoints;
-}
-
-//Returns the number of arcs of the player
-int getARCs (Game g, int player) {
-
-	return g->uni[player].numArcs;
-}
-
-//Returns number of G08s of specified player
-int getGO8s (Game g, int player) {
-	//Ensures that there is less than 8G08s the player owns, else error
-	assert (g->uni[player].numG08s <= MAX_G08S);
-	return g->uni[player].numG08s;
 }
 
 //Returns true/false, tests conditions for campus,
@@ -565,6 +636,41 @@ int retrainConditions (Game g, action a, int player) {
 	return answer;
 }
 
+//Function returns the KPI points of specified player
+int getKPIpoints (Game g, int player) {
+
+	int kpiPoints = 0;
+	
+	//Add KPI points from every object player owns
+	kpiPoints += g->uni[player].numArcs * ARCPTS;
+	kpiPoints += g->uni[player].numCmps * CAMPUSPTS;
+	kpiPoints += g->uni[player].numG08s * G08PTS;
+	kpiPoints += g->uni[player].numIPs * IPPTS;
+
+	//Conditions for prestige KPI points
+	if (player == g->mostArcs) {
+		kpiPoints += MOSTARCPTS;
+	} 
+
+	if (player == g->mostPubs) {
+		kpiPoints += MOSTPUBPTS;
+	}
+
+	return kpiPoints;
+}
+
+//Returns the number of arcs of the player
+int getARCs (Game g, int player) {
+
+	return g->uni[player].numArcs;
+}
+
+//Returns number of G08s of specified player
+int getGO8s (Game g, int player) {
+	//Ensures that there is less than 8G08s the player owns, else error
+	assert (g->uni[player].numG08s <= MAX_G08S);
+	return g->uni[player].numG08s;
+}
 
 //Checks to see if there is an arc in the edge
 int getARC (Game g, path pathToEdge) {
@@ -600,29 +706,6 @@ int getARC (Game g, path pathToEdge) {
 	return arcCode;
 }
 
-//Creates an ARC in given board
-void makeArc (Game g, char * path, int player) {
-
-	int xPtA = 0;
-	int yPtA = 0;
-	int zPtA = 0;
-	int xPtB = 0;
-	int yPtB = 0;
-	int zPtB = 0;
-	edge arc;
-	arc.pointA = pathMovement (path);
-	arc.pointB = movement (arc.pointA, BACK);
-
-	xPtA = arc.pointA.x + 3;
-	yPtA = arc.pointA.y + 3;
-	zPtA = arc.pointA.z + 3;
-	xPtB = arc.pointB.x + 3;
-	yPtB = arc.pointB.y + 3;
-	zPtB = arc.pointB.z + 3;
-	g->gameBoard.arc[xPtA][yPtA][zPtA][xPtB][yPtB][zPtB] = player;
-	g->gameBoard.arc[xPtB][yPtB][zPtB][xPtA][yPtA][zPtA] = player;
-}
-
 //Checks to see if there is a campus 
 int getCampus (Game g, path pathToVertex) {
 	
@@ -644,64 +727,6 @@ int getCampus (Game g, path pathToVertex) {
 	campusCode = g->gameBoard.campus[xArray][yArray][zArray];
 
 	return campusCode;
-}
-
-//Stores campus data in gameboard 
-void makeCampus (Game g, char * path, int player) {
-
-	int xArray = 0;
-	int yArray = 0;
-	int zArray = 0;
-	coord movedPoint;
-
-	movedPoint = pathMovement (path);
-	assert (abs(movedPoint.x+movedPoint.y+movedPoint.z) == 2);
-	//Save the player code into the array
-	xArray = movedPoint.x + 3;
-	yArray = movedPoint.y + 3;
-	zArray = movedPoint.z + 3;
-	g->gameBoard.campus[xArray][yArray][zArray] = player;
-
-}
-
-//Stores G08 data in gameboard 
-void makeG08 (Game g, char * path, int player) {
-
-	int xArray = 0;
-	int yArray = 0;
-	int zArray = 0;
-	coord movedPoint;
-
-	movedPoint = pathMovement (path);
-	//Save the player code into the array
-	xArray = movedPoint.x + 3;
-	yArray = movedPoint.y + 3;
-	zArray = movedPoint.z + 3;
-	//Since it's 4, 5, 6 for a GO8
-	g->gameBoard.campus[xArray][yArray][zArray] = player+3;
-}
-
-coord pathMovement (char * path) {
-
-	int move = 0;
-	int i = 0;
-	coord movedPoint;
-	coord start;
-	//Always start from upper Campus A
-	start.direction = 3;
-	start.x = -1;
-	start.y = 2;
-	start.z = -3;
-
-	movedPoint = start;
-	//Continuously searches string for movements and make moves to get to point
-	while (path[i] != 0) {
-		move = path[i];
-		movedPoint = movement (movedPoint, move);
-		i ++;
-	}
-
-	return movedPoint;
 }
 
 // which university currently has the prestige award for the most ARCs?
@@ -744,6 +769,174 @@ int getWhoseTurn (Game g){
     return whoseTurn;
 }
 
+//gets the number of normal campuses a player has
+int getCampuses (Game g, int player) {
+
+    //player 1 is position 0 and player 3 is position 2
+    return g->uni[player - 1].numCmps;
+}
+
+//get the number of IPS a player has
+int getIPs (Game g, int player) {
+
+    //g is a pointer to a struct
+    return g->uni[player - 1].numIPs;
+}
+
+//gets the number of Publications that a player has
+int getPublications (Game g, int player) {
+
+    //g is a pointer to a struct
+    //NB player 1 is position 0 and player 3 is position 2 in the array
+    return g->uni[player - 1].numPubs;
+}
+
+//gets the number of students a player has of a specific discipline
+int getStudents (Game g, int player, int discipline) {
+ 
+   //g is a pointer to a struct hence using "->" not "."
+    // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
+    return g->uni[player - 1].numStudents[discipline];
+}
+
+//get the exchange rate for retraining a student
+int getExchangeRate (Game g, int player,
+                     int disciplineFrom, int disciplineTo) {
+
+    //double check that isLegal is working
+    assert (disciplineFrom != STUDENT_THD);
+
+    //paths to different retraining centres
+    path training1, training2;
+    int rate;
+
+    if (disciplineFrom == STUDENT_MTV) {
+        strcpy (training1, TV1);
+        strcpy (training2, TV2);
+    } else if (disciplineFrom == STUDENT_MMONEY) {
+        strcpy (training1, MONEY1);
+        strcpy (training2, MONEY2);
+    } else if (disciplineFrom == STUDENT_BPS) {
+        strcpy (training1, ENGINEER1);
+        strcpy (training2, ENGINEER2);
+    } else if (disciplineFrom == STUDENT_BQN) {
+        strcpy (training1, SCIENCE1);
+        strcpy (training2, SCIENCE2);
+    } else {
+        strcpy (training1, JOB1);
+        strcpy (training2, JOB2);
+    }
+
+    //NB player = ARC code e.g. player 1/(UNI_A) = ARC_A
+    if ((getCampus (g, training1) == player) || \
+    	(getCampus (g, training2) == player)) {
+        rate = 2;
+    } else {
+        rate = 3;
+    }
+    return rate;
+}
+
+int rollDice (void) {
+
+    int diceValue = 0;
+    diceValue = (rand()%6 + 1) + (rand()%6 + 1);
+
+    return diceValue;
+}
+
+//Returns a pointer to an array of three regions,
+//Each with a student value supposedly.
+int *checkCampRegion (Game g, path pathToVertex) {
+
+	int xArray = 0;
+	int yArray = 0;
+	int zArray = 0;
+	char *path = pathToVertex;
+	int sign = 0;
+	//When coordinate > 0, the others are -+1.
+	int *region = malloc (3);
+	//Since there are max 3 regions covering vertex
+	coord movedPoint;
+
+	movedPoint = pathMovement (path);
+	assert (abs(movedPoint.x+movedPoint.y+movedPoint.z) == 2);
+
+	xArray = movedPoint.x + 3;
+	yArray = movedPoint.y + 3;
+	zArray = movedPoint.z + 3;
+	//Since it's 4, 5, 6 for a GO8
+
+	//As logically sum of region coordinates = 0,
+	//Thus to make it 0 you have to add the opposite to the
+	//other coordinates. (opposite sign)
+	if (movedPoint.x+movedPoint.y+movedPoint.z == -2) {
+		sign = 1;
+	} else {
+		sign = -1;
+	}
+
+	//Now to determine if the board is at the edge
+	//Since then it will only have two regions instead.
+	//Returns the regionIDs, if regionID = 19, there is no region there
+	if (abs (movedPoint.x) == 3) {
+		region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+		region[1] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+		region[2] = 19;
+	} else if (abs (movedPoint.y) == 3) {
+		region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+		region[1] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+		region[2] = 19;
+	} else if (abs (movedPoint.z) == 3) {
+		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+		region[2] = 19;
+	} else if (abs (movedPoint.x*movedPoint.y*movedPoint.z) == 8) {
+		if (movedPoint.x == movedPoint.y) {
+			//Only one region in this few ones:
+			region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+			region[1] = 19;
+			region[2] = 19;
+		} else if (movedPoint.x == movedPoint.z) {
+			region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+			region[1] = 19;
+			region[2] = 19;
+		} else if (movedPoint.y == movedPoint.z) {
+			region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+			region[1] = 19;
+			region[2] = 19;
+		}
+	} else {
+		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+		region[2] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+	}
+	
+	return region;
+}
+
+coord pathMovement (char * path) {
+
+	int move = 0;
+	int i = 0;
+	coord movedPoint;
+	coord start;
+	//Always start from upper Campus A
+	start.direction = 3;
+	start.x = -1;
+	start.y = 2;
+	start.z = -3;
+
+	movedPoint = start;
+	//Continuously searches string for movements and make moves to get to point
+	while (path[i] != 0) {
+		move = path[i];
+		movedPoint = movement (movedPoint, move);
+		i ++;
+	}
+
+	return movedPoint;
+}
 
 /* Movement Function 
  *
@@ -843,209 +1036,4 @@ coord movement (coord point, char move) {
 	}
 
 	return newMove;
-}
-
-//gets the number of normal campuses a player has
-int getCampuses (Game g, int player) {
-
-    //player 1 is position 0 and player 3 is position 2
-    return g->uni[player - 1].numCmps;
-}
-
-//get the number of IPS a player has
-int getIPs (Game g, int player) {
-
-    //g is a pointer to a struct
-    return g->uni[player - 1].numIPs;
-}
-
-//gets the number of Publications that a player has
-int getPublications (Game g, int player) {
-
-    //g is a pointer to a struct
-    //NB player 1 is position 0 and player 3 is position 2 in the array
-    return g->uni[player - 1].numPubs;
-}
-
-//gets the number of students a player has of a specific discipline
-int getStudents (Game g, int player, int discipline) {
- 
-   //g is a pointer to a struct hence using "->" not "."
-    // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
-    return g->uni[player - 1].numStudents[discipline];
-}
-
-//get the exchange rate for retraining a student
-int getExchangeRate (Game g, int player,
-                     int disciplineFrom, int disciplineTo) {
-
-    //double check that isLegal is working
-    assert (disciplineFrom != STUDENT_THD);
-
-    //paths to different retraining centres
-    path training1, training2;
-    int rate;
-
-    if (disciplineFrom == STUDENT_MTV) {
-        strcpy (training1, TV1);
-        strcpy (training2, TV2);
-    } else if (disciplineFrom == STUDENT_MMONEY) {
-        strcpy (training1, MONEY1);
-        strcpy (training2, MONEY2);
-    } else if (disciplineFrom == STUDENT_BPS) {
-        strcpy (training1, ENGINEER1);
-        strcpy (training2, ENGINEER2);
-    } else if (disciplineFrom == STUDENT_BQN) {
-        strcpy (training1, SCIENCE1);
-        strcpy (training2, SCIENCE2);
-    } else {
-        strcpy (training1, JOB1);
-        strcpy (training2, JOB2);
-    }
-
-    //NB player = ARC code e.g. player 1/(UNI_A) = ARC_A
-    if ((getCampus (g, training1) == player) || \
-    	(getCampus (g, training2) == player)) {
-        rate = 2;
-    } else {
-        rate = 3;
-    }
-    return rate;
-}
-
-//Stores region data in gameboard
-void makeRegion (Game g, int discipline[]) {
-
-	g->gameBoard.region[1][5][3] = 0;
-	g->gameBoard.region[1][4][4] = 1;
-	g->gameBoard.region[1][3][5] = 2;
-
-	g->gameBoard.region[2][5][2] = 3;
-	g->gameBoard.region[2][4][3] = 4;
-	g->gameBoard.region[2][3][4] = 5;
-	g->gameBoard.region[2][2][5] = 6;
-
-	g->gameBoard.region[3][5][1] = 7;
-	g->gameBoard.region[3][4][2] = 8;
-	g->gameBoard.region[3][3][3] = 9;
-	g->gameBoard.region[3][2][4] = 10;
-	g->gameBoard.region[3][1][5] = 11;
-
-	g->gameBoard.region[4][4][1] = 12;
-	g->gameBoard.region[4][3][2] = 13;
-	g->gameBoard.region[4][2][3] = 14;
-	g->gameBoard.region[4][1][4] = 15;
-
-	g->gameBoard.region[5][3][1] = 16;
-	g->gameBoard.region[5][2][2] = 17;
-	g->gameBoard.region[5][1][3] = 18;
-}
-
-//Returns a pointer to an array of three regions,
-//Each with a student value supposedly.
-int *checkCampRegion (Game g, path pathToVertex) {
-
-	int xArray = 0;
-	int yArray = 0;
-	int zArray = 0;
-	char *path = pathToVertex;
-	int sign = 0;
-	//When coordinate > 0, the others are -+1.
-	int *region = malloc (3);
-	//Since there are max 3 regions covering vertex
-	coord movedPoint;
-
-	movedPoint = pathMovement (path);
-	assert (abs(movedPoint.x+movedPoint.y+movedPoint.z) == 2);
-
-	xArray = movedPoint.x + 3;
-	yArray = movedPoint.y + 3;
-	zArray = movedPoint.z + 3;
-	//Since it's 4, 5, 6 for a GO8
-
-	//As logically sum of region coordinates = 0,
-	//Thus to make it 0 you have to add the opposite to the
-	//other coordinates. (opposite sign)
-	if (movedPoint.x+movedPoint.y+movedPoint.z == -2) {
-		sign = 1;
-	} else {
-		sign = -1;
-	}
-
-	//Now to determine if the board is at the edge
-	//Since then it will only have two regions instead.
-	//Returns the regionIDs, if regionID = 19, there is no region there
-	if (abs (movedPoint.x) == 3) {
-		region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
-		region[1] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
-		region[2] = 19;
-	} else if (abs (movedPoint.y) == 3) {
-		region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
-		region[1] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
-		region[2] = 19;
-	} else if (abs (movedPoint.z) == 3) {
-		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
-		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
-		region[2] = 19;
-	} else if (abs (movedPoint.x*movedPoint.y*movedPoint.z) == 8) {
-		if (movedPoint.x == movedPoint.y) {
-			//Only one region in this few ones:
-			region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
-			region[1] = 19;
-			region[2] = 19;
-		} else if (movedPoint.x == movedPoint.z) {
-			region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
-			region[1] = 19;
-			region[2] = 19;
-		} else if (movedPoint.y == movedPoint.z) {
-			region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
-			region[1] = 19;
-			region[2] = 19;
-		}
-	} else {
-		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
-		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
-		region[2] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
-	}
-	
-	return region;
-}
-
-void addStudents (int regionID) {
-
-    int i = 0;
-    int x = 0;
-    int y = 0;
-    int z = 0;
-    int curPlayer = UNI_A-1;
-    int curVertex = g->gameBoard.campus[x][y][z];
-    int *regionSurround = checkCampRegion (Game g, int x, int y, int z);
-    while (x < 6) {
-    	while (y < 6) {
-    		while (z < 6) {
-                curVertex = g->gameBoard.campus[x][y][z];
-    			if (curVertex > 0) {
-                    regionSurround = checkCampRegion (g, x, y, z);
-                    i = 0;
-                    while (i < 3 && regionSurround[i] == regionID) {
-                        //mod curVertex by 4 to obtain value between 0-2
-                        //since curVertex is 1-6
-                        curPlayer = curVertex % 4;
-                        if (curVertex >= 1 && curVertex <= 3) {
-                            g->uni[curPlayer].numStudents[getDiscipline[regionID]]++;
-                        } else if (curVertex >= 4 && curVertex <= 6) {
-                            g->uni[curPlayer].numStudents[getDiscipline[regionID]] += 2;
-                        }
-                        i++;
-                    }
-                }
-                z++;
-    		}
-            z = 0;
-            y++;
-    	}
-        y = 0;
-        x++;
-    }
-    free (regionSurround);
 }
