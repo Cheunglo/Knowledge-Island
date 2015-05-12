@@ -340,41 +340,6 @@ void throwDice (Game g, int diceScore) {
         }
         i++;
     }
-    
-	int x = 0;
-    int y = 0;
-    int z = 0;
-    int curPlayer = UNI_A-1;
-    int curVertex = g->gameBoard.campus[x][y][z];
-    int *regionSurround = checkCampRegion (Game g, int x, int y, int z);
-    while (x < 6) {
-    	while (y < 6) {
-    		while (z < 6) {
-                curVertex = g->gameBoard.campus[x][y][z];
-    			if (curVertex > 0) {
-                    regionSurround = checkCampRegion (g, x, y, z);
-                    i = 0;
-                    while (i < 3 && regionSurround[i] == regionID) {
-                        //mod curVertex by 4 to obtain value between 0-2
-                        //since curVertex is 1-6
-                        curPlayer = curVertex % 4;
-                        if (curVertex >= 1 && curVertex <= 3) {
-                            g->uni[curPlayer].numStudents[getDiscipline[regionID]]++;
-                        } else if (curVertex >= 4 && curVertex <= 6) {
-                            g->uni[curPlayer].numStudents[getDiscipline[regionID]] += 2;
-                        }
-                        i++;
-                    }
-                }
-                z++;
-    		}
-            z = 0;
-            y++;
-    	}
-        y = 0;
-        x++;
-    }
-    free (regionSurround);
 
     // whenever a 7 is thrown, immediately after any new students are produced,
     // all MTV and MMONEY students of all universities decide to switch to ThD's.
@@ -1038,4 +1003,43 @@ int *checkCampRegion (Game g, path pathToVertex) {
 	}
 	
 	return region;
+}
+
+void addStudents (int regionID) {
+
+    int i = 0;
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    int curPlayer = UNI_A-1;
+    int curVertex = g->gameBoard.campus[x][y][z];
+    int *regionSurround = checkCampRegion (Game g, int x, int y, int z);
+    while (x < 6) {
+    	while (y < 6) {
+    		while (z < 6) {
+                curVertex = g->gameBoard.campus[x][y][z];
+    			if (curVertex > 0) {
+                    regionSurround = checkCampRegion (g, x, y, z);
+                    i = 0;
+                    while (i < 3 && regionSurround[i] == regionID) {
+                        //mod curVertex by 4 to obtain value between 0-2
+                        //since curVertex is 1-6
+                        curPlayer = curVertex % 4;
+                        if (curVertex >= 1 && curVertex <= 3) {
+                            g->uni[curPlayer].numStudents[getDiscipline[regionID]]++;
+                        } else if (curVertex >= 4 && curVertex <= 6) {
+                            g->uni[curPlayer].numStudents[getDiscipline[regionID]] += 2;
+                        }
+                        i++;
+                    }
+                }
+                z++;
+    		}
+            z = 0;
+            y++;
+    	}
+        y = 0;
+        x++;
+    }
+    free (regionSurround);
 }
