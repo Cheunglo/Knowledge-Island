@@ -7,7 +7,7 @@
 #include <math.h>
 #include <assert.h>
 #include <string.h>
-#include "Game-1.07.h"
+#include "Game.h"
 
 //Possible movements via path:
 #define LEFT 'L'
