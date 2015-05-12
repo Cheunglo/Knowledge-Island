@@ -15,6 +15,7 @@
 #define BACK 'B' 
 #define NUM_DIRECTIONS 6
 #define COORD 7 //Number of coordinates in x, y, z plane, -3to3
+#define REGIONCOORD 6
 
 //Maximum values of items
 #define MAX_KPIPTS 150
@@ -85,6 +86,7 @@ typedef struct _board {
 	//Stores campus player code
 	//Regular campuses are 1, 2, 3 but G08s are 4, 5, 6
 	int campus[COORD][COORD][COORD];
+	int region[REGIONCOORD][REGIONCOORD][REGIONCOORD];
 	//Stores arc player code
 	//Each arc will have two copies, since an arc is between two
 	//points, hence points A - B and B - A
@@ -119,9 +121,11 @@ int arcConditions (Game g, action a, int player);
 int spinoffConditions (Game g, action a, int player);
 int retrainConditions (Game g, action a, int player);
 void initializeBoard (Game g);
+void makeRegion (Game g, int discipline[]);
 void makeArc (Game g, char * path, int player);
 void makeCampus (Game g, char * path, int player);
 void makeG08 (Game g, char * path, int player);
+void addStudents (int regionID);
 int rollDice (void);
 coord pathMovement (char * path);
 coord movement (coord point, char move); //single movements only
@@ -184,6 +188,7 @@ Game newGame (int discipline[], int dice[]) {
 
 //Initializes the board for newGame()
 void initializeBoard (Game g) {
+	makeRegion();
 	//For player 1 UNI_A
 	g->gameBoard.campus[2][5][0] = UNI_A;
 	char * path;
@@ -331,18 +336,51 @@ void throwDice (Game g, int diceScore) {
     while (i < NUM_REGIONS) {
         if (diceScore == getDiceValue(g, i)) {
             regionID = i;
-            i = 999;
-        } else {
-            i++;
+            addStudents (regionID);
         }
+        i++;
     }
-
+    
+	int x = 0;
+    int y = 0;
+    int z = 0;
+    int curPlayer = UNI_A-1;
+    int curVertex = g->gameBoard.campus[x][y][z];
+    int *regionSurround = checkCampRegion (Game g, int x, int y, int z);
+    while (x < 6) {
+    	while (y < 6) {
+    		while (z < 6) {
+                curVertex = g->gameBoard.campus[x][y][z];
+    			if (curVertex > 0) {
+                    regionSurround = checkCampRegion (g, x, y, z);
+                    i = 0;
+                    while (i < 3 && regionSurround[i] == regionID) {
+                        //mod curVertex by 4 to obtain value between 0-2
+                        //since curVertex is 1-6
+                        curPlayer = curVertex % 4;
+                        if (curVertex >= 1 && curVertex <= 3) {
+                            g->uni[curPlayer].numStudents[getDiscipline[regionID]]++;
+                        } else if (curVertex >= 4 && curVertex <= 6) {
+                            g->uni[curPlayer].numStudents[getDiscipline[regionID]] += 2;
+                        }
+                        i++;
+                    }
+                }
+                z++;
+    		}
+            z = 0;
+            y++;
+    	}
+        y = 0;
+        x++;
+    }
+    free (regionSurround);
 
     // whenever a 7 is thrown, immediately after any new students are produced,
     // all MTV and MMONEY students of all universities decide to switch to ThD's.
     if (diceScore == 7) {
         // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
-        int curPlayer = UNI_A-1;
+		curPlayer = UNI_A-1;
         while (curPlayer < NUM_UNIS) {
             g->uni[curPlayer].numStudents[STUDENT_THD] += g->uni[curPlayer].numStudents[STUDENT_MTV] +
                                                           g->uni[curPlayer].numStudents[STUDENT_MMONEY];
@@ -902,4 +940,102 @@ int getExchangeRate (Game g, int player,
         rate = 3;
     }
     return rate;
+}
+
+//Stores region data in gameboard
+void makeRegion (Game g, int discipline[]) {
+
+	g->gameBoard.region[1][5][3] = 0;
+	g->gameBoard.region[1][4][4] = 1;
+	g->gameBoard.region[1][3][5] = 2;
+
+	g->gameBoard.region[2][5][2] = 3;
+	g->gameBoard.region[2][4][3] = 4;
+	g->gameBoard.region[2][3][4] = 5;
+	g->gameBoard.region[2][2][5] = 6;
+
+	g->gameBoard.region[3][5][1] = 7;
+	g->gameBoard.region[3][4][2] = 8;
+	g->gameBoard.region[3][3][3] = 9;
+	g->gameBoard.region[3][2][4] = 10;
+	g->gameBoard.region[3][1][5] = 11;
+
+	g->gameBoard.region[4][4][1] = 12;
+	g->gameBoard.region[4][3][2] = 13;
+	g->gameBoard.region[4][2][3] = 14;
+	g->gameBoard.region[4][1][4] = 15;
+
+	g->gameBoard.region[5][3][1] = 16;
+	g->gameBoard.region[5][2][2] = 17;
+	g->gameBoard.region[5][1][3] = 18;
+}
+
+//Returns a pointer to an array of three regions,
+//Each with a student value supposedly.
+int *checkCampRegion (Game g, path pathToVertex) {
+
+	int xArray = 0;
+	int yArray = 0;
+	int zArray = 0;
+	char *path = pathToVertex;
+	int sign = 0;
+	//When coordinate > 0, the others are -+1.
+	int *region = malloc (3);
+	//Since there are max 3 regions covering vertex
+	coord movedPoint;
+
+	movedPoint = pathMovement (path);
+	assert (abs(movedPoint.x+movedPoint.y+movedPoint.z) == 2);
+
+	xArray = movedPoint.x + 3;
+	yArray = movedPoint.y + 3;
+	zArray = movedPoint.z + 3;
+	//Since it's 4, 5, 6 for a GO8
+
+	//As logically sum of region coordinates = 0,
+	//Thus to make it 0 you have to add the opposite to the
+	//other coordinates. (opposite sign)
+	if (movedPoint.x+movedPoint.y+movedPoint.z == -2) {
+		sign = 1;
+	} else {
+		sign = -1;
+	}
+
+	//Now to determine if the board is at the edge
+	//Since then it will only have two regions instead.
+	//Returns the regionIDs, if regionID = 19, there is no region there
+	if (abs (movedPoint.x) == 3) {
+		region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+		region[1] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+		region[2] = 19;
+	} else if (abs (movedPoint.y) == 3) {
+		region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+		region[1] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+		region[2] = 19;
+	} else if (abs (movedPoint.z) == 3) {
+		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+		region[2] = 19;
+	} else if (abs (movedPoint.x*movedPoint.y*movedPoint.z) == 8) {
+		if (movedPoint.x == movedPoint.y) {
+			//Only one region in this few ones:
+			region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+			region[1] = 19;
+			region[2] = 19;
+		} else if (movedPoint.x == movedPoint.z) {
+			region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+			region[1] = 19;
+			region[2] = 19;
+		} else if (movedPoint.y == movedPoint.z) {
+			region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+			region[1] = 19;
+			region[2] = 19;
+		}
+	} else {
+		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+		region[2] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+	}
+	
+	return region;
 }
