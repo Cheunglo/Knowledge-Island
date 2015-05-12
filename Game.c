@@ -42,11 +42,16 @@
 #define MOSTPUBPTS 10 
 
 //Paths to different retraining centres from top Campus A
-#define TV "RR"                 //MTV retraining centre
-#define MONEY "LRL"             //MMONEY retraining centre  
-#define ENGINEER "RLRRLLRLRL"   //BPS retraining centre
-#define SCIENCE "RLLRLRLRR"     //BQN retraining centre
-#define JOB "RLLRLRRLRLR"       //MJOBS retraining centre
+#define TV1 "R"			//MTV 1 retraining centre	
+#define TV2 "RR"                //MTV 2 retraining centre
+#define MONEY1 "LR"		//MMONEY2 retraining centre
+#define MONEY2 "LRL"            //MMONEY2 retraining centre
+#define ENGINEER1 "RLRRLLRLR"	//BPS1 retraining centre
+#define ENGINEER2 "RLRRLLRLRL"  //BPS2 retraining centre
+#define SCIENCE1 "RLLRLRLR"     //BQN1 retraining centre
+#define SCIENCE2 "RLLRLRLRR"    //BQN2 retraining centre
+#define JOB1 "RLLRLRRLRL"       //MJOBS1 retraining centre
+#define JOB2 "RLLRLRRLRLR"       //MJOBS2 retraining centre
    
 
 #define DEFAULT_DISCIPLINES {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ, \
