@@ -101,11 +101,11 @@ int main (int argc, char *argv[]) {
 	testGetMostPublications ();
 	testGetTurnNUmber ();
 	testGetWhoseTurn ();
+	testIsLegalAction ();
 
 	//Failed:
    	testgetStudents ();
 	testMakeAction ();
-	testIsLegalAction ();
 	testGetKPIpoints ();
 	testgetExchangeRate ();
 	testgetPublications ();
