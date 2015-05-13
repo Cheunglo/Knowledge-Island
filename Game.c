@@ -496,39 +496,45 @@ int getDiceValue (Game g, int regionID) {
 //Returns TRUE/FALSE on whether action is legal or not
 int isLegalAction (Game g, action a) {
 
-	int output = FALSE;
+	int output = TRUE;
 	int player = getWhoseTurn (g);
+	printf ("Initial output, true is: %d\n", output);
 
 	//Ensures game has already started
-	if (g->currentTurn < 0) {
+	if (getTurnNumber (g) == -1) {
 		output = FALSE; 
 	} 
+	printf ("Output after turn testing now is: %d\n", output);
 
 	//Ensure action codes are legal
-	if ((a.actionCode >= 0) && (a.actionCode < 8)) {
+	if ((a.actionCode < 0) || (a.actionCode >= 8)) {
 		output = FALSE; 
 	}
+	printf ("Output after action code now is: %d\n", output);
 
-	//Tests the conditions for building the 
-	if (a.actionCode == PASS) {
-		output = TRUE;
-	} else if (a.actionCode == BUILD_CAMPUS) {
-		output = cmpsConditions (g, a, player);
-	} else if (a.actionCode == BUILD_GO8) {
-		output = G08Conditions (g, a, player);
-	} else if (a.actionCode == OBTAIN_ARC) {
-		output = arcConditions (g, a, player);
-	} else if (a.actionCode == START_SPINOFF) {
-		output = spinoffConditions (g, a, player); 
-	} else if (a.actionCode == OBTAIN_PUBLICATION) {
-		//no player should be able to obtain publication freely
-		output = FALSE;
-	} else if (a.actionCode == OBTAIN_IP_PATENT) {
-		//no player should be able to obtain IP patent freely
-		output = FALSE;
-	} else if (a.actionCode == RETRAIN_STUDENTS) {
-		output = retrainConditions (g, a, player);
+	//Tests the conditions for building things if it's not already false
+	if (output != FALSE) {
+		if (a.actionCode == PASS) {
+			output = TRUE;
+		} else if (a.actionCode == BUILD_CAMPUS) {
+			output = cmpsConditions (g, a, player);
+		} else if (a.actionCode == BUILD_GO8) {
+			output = G08Conditions (g, a, player);
+		} else if (a.actionCode == OBTAIN_ARC) {
+			output = arcConditions (g, a, player);
+		} else if (a.actionCode == START_SPINOFF) {
+			output = spinoffConditions (g, a, player); 
+		} else if (a.actionCode == OBTAIN_PUBLICATION) {
+			//no player should be able to obtain publication freely
+			output = FALSE;
+		} else if (a.actionCode == OBTAIN_IP_PATENT) {
+			//no player should be able to obtain IP patent freely
+			output = FALSE;
+		} else if (a.actionCode == RETRAIN_STUDENTS) {
+			output = retrainConditions (g, a, player);
+		}
 	}
+	printf ("Output after move testing now is: %d\n", output);
 
 	return output;
 }
@@ -595,18 +601,29 @@ int spinoffConditions (Game g, action a, int player) {
 //Does not leave into the sea, and path is vacant
 int arcConditions (Game g, action a, int player) {
 
-	int answer = FALSE;
+	int answer = TRUE;
+	edge arc;
+	char *path = a.destination;
+	arc.pointA = pathMovement (path);
+	arc.pointB = movement (arc.pointA, BACK);
 
-	if ((g->uni[player].numStudents[STUDENT_BPS] >= 1) 
-		&& (g->uni[player].numStudents[STUDENT_BQN] >= 1) 
+	if ((getStudents (g, player, STUDENT_BPS) >= 1) 
+		&& (getStudents (g, player, STUDENT_BQN) >= 1) 
 		&& (a.destination[0] != BACK)  //player doesn't move back to sea
-		&& (sizeof (a.destination) < PATH_LIMIT) 
-		&& (getARC (g, a.destination) == VACANT_ARC)) {
-
+		&& (sizeof (a.destination) < PATH_LIMIT)) {
 		answer = TRUE;
 	} else {
 		answer = FALSE;
 	}
+
+	//Checks to see that they are actual adjacent vertexes
+	if (answer == TRUE 
+		&& abs(arc.pointA.x+arc.pointA.y+arc.pointA.z) != 2 
+		&& (arc.pointA.x+arc.pointA.y+arc.pointA.z+arc.pointB.z != 0)
+		&& (getARC (g, a.destination) != VACANT_ARC)) {
+		answer = FALSE;
+	} 
+
 	return answer;
 }
 
@@ -804,7 +821,7 @@ int getExchangeRate (Game g, int player,
                      int disciplineFrom, int disciplineTo) {
 
     //double check that isLegal is working
-    assert (disciplineFrom != STUDENT_THD);
+    //assert (disciplineFrom != STUDENT_THD);
 
     //paths to different retraining centres
     path training1, training2;
