@@ -498,19 +498,16 @@ int isLegalAction (Game g, action a) {
 
 	int output = TRUE;
 	int player = getWhoseTurn (g);
-	printf ("Initial output, true is: %d\n", output);
 
 	//Ensures game has already started
 	if (getTurnNumber (g) == -1) {
 		output = FALSE; 
 	} 
-	printf ("Output after turn testing now is: %d\n", output);
 
 	//Ensure action codes are legal
 	if ((a.actionCode < 0) || (a.actionCode >= 8)) {
 		output = FALSE; 
 	}
-	printf ("Output after action code now is: %d\n", output);
 
 	//Tests the conditions for building things if it's not already false
 	if (output != FALSE) {
@@ -534,7 +531,6 @@ int isLegalAction (Game g, action a) {
 			output = retrainConditions (g, a, player);
 		}
 	}
-	printf ("Output after move testing now is: %d\n", output);
 
 	return output;
 }
@@ -545,16 +541,31 @@ int isLegalAction (Game g, action a) {
 int cmpsConditions (Game g, action a, int player) {
 
 	int answer = FALSE;
+	char *path = a.destination;
+	coord vertex = pathMovement (path);
 
-	if ((g->uni[player].numStudents[STUDENT_BPS] >= 1) 
-		&& (g->uni[player].numStudents[STUDENT_BQN] >= 1) 
-		&& (g->uni[player].numStudents[STUDENT_MJ] >= 1) 
-		&& (g->uni[player].numStudents[STUDENT_MTV] >= 1) 
+	if ((getStudents (g, player, STUDENT_BPS) >= 1) 
+		&& (getStudents (g, player, STUDENT_BQN) >= 1)
+		&& (getStudents (g, player, STUDENT_MJ) >= 1)
+		&& (getStudents (g, player, STUDENT_MTV) >= 1)
 		&& (getCampus (g, a.destination) == VACANT_VERTEX)
 		&& (getARC (g, a.destination) != VACANT_ARC)) {
 
 		answer = TRUE;
 	} else {
+		answer = FALSE;
+	}
+
+	//check if they're inside the boundaries
+	if (answer == TRUE
+		&& abs (vertex.x) >= 3
+		&& abs (vertex.y) >= 3
+		&& abs (vertex.z) >= 3) {
+		answer = FALSE;
+	}
+
+	if (answer == TRUE
+		&& abs (vertex.x+vertex.y+vertex.z) != 2) {
 		answer = FALSE;
 	}
 
@@ -565,11 +576,13 @@ int cmpsConditions (Game g, action a, int player) {
 int G08Conditions (Game g, action a, int player) {
 
 	int answer = FALSE;
+	char *path = a.destination;
+	coord vertex = pathMovement (path);
 
-	if ((g->uni[player].numStudents[STUDENT_MJ] >= 2) 
-		&& (g->uni[player].numStudents[STUDENT_MMONEY] >= 3) 
-		&& (g->uni[player].numCmps > 0) 
-		&& (g->uni[player].numG08s < MAX_G08S) 
+	if ((getStudents (g, player, STUDENT_MJ) >= 2) 
+		&& (getStudents (g, player, STUDENT_MMONEY) >= 3)
+		&& (getCampuses (g, player) > 0)
+		&& (getGO8s (g, player) < MAX_G08S)
 		&& (getCampus (g, a.destination) > 3)) {
 
 		answer = TRUE;
@@ -577,8 +590,23 @@ int G08Conditions (Game g, action a, int player) {
 		answer = FALSE;
 	}
 
+	//check if they're inside the boundaries
+	if (answer == TRUE
+		&& abs (vertex.x) >= 3
+		&& abs (vertex.y) >= 3
+		&& abs (vertex.z) >= 3) {
+		answer = FALSE;
+	}
+
+	//Checks that it's a vertex
+	if (answer == TRUE
+		&& abs (vertex.x+vertex.y+vertex.z) != 2) {
+		answer = FALSE;
+	}
+
 	return answer;
 }
+
 
 //Tests conditions for a spinoff, which is MJ+MTV+MMNY
 int spinoffConditions (Game g, action a, int player) {
@@ -602,24 +630,32 @@ int spinoffConditions (Game g, action a, int player) {
 int arcConditions (Game g, action a, int player) {
 
 	int answer = TRUE;
-	edge arc;
 	char *path = a.destination;
+	edge arc;
 	arc.pointA = pathMovement (path);
 	arc.pointB = movement (arc.pointA, BACK);
 
 	if ((getStudents (g, player, STUDENT_BPS) >= 1) 
-		&& (getStudents (g, player, STUDENT_BQN) >= 1) 
-		&& (a.destination[0] != BACK)  //player doesn't move back to sea
-		&& (sizeof (a.destination) < PATH_LIMIT)) {
+		&& (getStudents (g, player, STUDENT_BQN) >= 1)
+		&& (a.destination[0] != BACK)) { //doesn't move back into the sea
+		printf ("it went here!\n");
 		answer = TRUE;
 	} else {
+		answer = FALSE;
+	}
+
+	//check if they're inside the boundaries
+	if (answer == TRUE
+		&& abs (arc.pointA.x) >= 3
+		&& abs (arc.pointA.y) >= 3
+		&& abs (arc.pointA.z) >= 3) {
 		answer = FALSE;
 	}
 
 	//Checks to see that they are actual adjacent vertexes
 	if (answer == TRUE 
 		&& abs(arc.pointA.x+arc.pointA.y+arc.pointA.z) != 2 
-		&& (arc.pointA.x+arc.pointA.y+arc.pointA.z+arc.pointB.z != 0)
+		&& (arc.pointA.x+arc.pointA.y+arc.pointA.z+arc.pointB.x+arc.pointB.y+arc.pointB.z != 0)
 		&& (getARC (g, a.destination) != VACANT_ARC)) {
 		answer = FALSE;
 	} 
