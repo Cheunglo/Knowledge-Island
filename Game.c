@@ -7,7 +7,7 @@
 #include <math.h>
 #include <assert.h>
 #include <string.h>
-#include "Game.h"
+#include "Game-1.07.h"
 
 //Possible movements via path:
 #define LEFT 'L'
@@ -104,7 +104,7 @@ typedef struct _game {
     int regionDiscipline[NUM_REGIONS];
     int regionDice[NUM_REGIONS];
     board gameBoard; 
-    player uni[NUM_UNIS];       
+    player uni[NO_PLAYERS];       
 } game;
 
 void initializeBoard (Game g);
@@ -112,7 +112,7 @@ void makeRegion (Game g, int discipline[]);
 void makeArc (Game g, char * path, int player);
 void makeCampus (Game g, char * path, int player);
 void makeG08 (Game g, char * path, int player);
-void addStudents (int regionID);
+void addStudents (Game g, int regionID);
 int cmpsConditions (Game g, action a, int player);
 int G08Conditions (Game g, action a, int player);
 int arcConditions (Game g, action a, int player);
@@ -127,8 +127,13 @@ coord movement (coord point, char move); //single movements only
 // and player resources
 Game newGame (int discipline[], int dice[]) {
 
+
     // sets memory aside for the game
     Game g = malloc (sizeof(game));
+
+    //Makes region
+	makeRegion(g, discipline);
+	
 
     // initialise turn to -1
     g->currentTurn = -1;
@@ -176,9 +181,7 @@ Game newGame (int discipline[], int dice[]) {
 
 //Initializes the board for newGame()
 void initializeBoard (Game g) {
-	
-	makeRegion();
-	
+
 	//For player 1 UNI_A
 	g->gameBoard.campus[2][5][0] = UNI_A;
 	char * path;
@@ -318,6 +321,7 @@ void throwDice (Game g, int diceScore) {
 
     // advances the game to next turn
     g->currentTurn++;
+    int curPlayer = 0;
 
     // to obtain the regionID/location of the diceScore/diceValue
     int i = 0;
@@ -325,7 +329,7 @@ void throwDice (Game g, int diceScore) {
     while (i < NUM_REGIONS) {
         if (diceScore == getDiceValue(g, i)) {
             regionID = i;
-            addStudents (regionID);
+            addStudents (g, regionID);
         }
         i++;
     }
@@ -334,7 +338,7 @@ void throwDice (Game g, int diceScore) {
     // all MTV and MMONEY students of all universities decide to switch to ThD's.
     if (diceScore == 7) {
         // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
-		curPlayer = UNI_A-1;
+		curPlayer = UNI_A;
         while (curPlayer < NUM_UNIS) {
             g->uni[curPlayer].numStudents[STUDENT_THD] += g->uni[curPlayer].numStudents[STUDENT_MTV] +
                                                           g->uni[curPlayer].numStudents[STUDENT_MMONEY];
@@ -431,7 +435,7 @@ void makeG08 (Game g, char * path, int player) {
 	g->gameBoard.campus[xArray][yArray][zArray] = player+3;
 }
 
-void addStudents (int regionID) {
+void addStudents (Game g, int regionID) {
 
     int i = 0;
     int x = 0;
@@ -439,7 +443,7 @@ void addStudents (int regionID) {
     int z = 0;
     int curPlayer = UNI_A-1;
     int curVertex = g->gameBoard.campus[x][y][z];
-    int *regionSurround = checkCampRegion (Game g, int x, int y, int z);
+    int *regionSurround = checkCampRegion (g, x, y, z);
     
     while (x < 6) {
     	while (y < 6) {
@@ -453,9 +457,9 @@ void addStudents (int regionID) {
                         //since curVertex is 1-6
                         curPlayer = curVertex % 4;
                         if (curVertex >= 1 && curVertex <= 3) {
-                            g->uni[curPlayer].numStudents[getDiscipline[regionID]]++;
+                            g->uni[curPlayer].numStudents[getDiscipline(g, regionID)]++;
                         } else if (curVertex >= 4 && curVertex <= 6) {
-                            g->uni[curPlayer].numStudents[getDiscipline[regionID]] += 2;
+                            g->uni[curPlayer].numStudents[getDiscipline(g, regionID)] += 2;
                         }
                         i++;
                     }
@@ -899,30 +903,25 @@ int rollDice (void) {
 
 //Returns a pointer to an array of three regions,
 //Each with a student value supposedly.
-int *checkCampRegion (Game g, path pathToVertex) {
+int *checkCampRegion (Game g, int x, int y, int z) {
 
 	int xArray = 0;
 	int yArray = 0;
 	int zArray = 0;
-	char *path = pathToVertex;
 	int sign = 0;
 	//When coordinate > 0, the others are -+1.
 	int *region = malloc (3);
 	//Since there are max 3 regions covering vertex
-	coord movedPoint;
 
-	movedPoint = pathMovement (path);
-	assert (abs(movedPoint.x+movedPoint.y+movedPoint.z) == 2);
-
-	xArray = movedPoint.x + 3;
-	yArray = movedPoint.y + 3;
-	zArray = movedPoint.z + 3;
+	xArray = x + 3;
+	yArray = y + 3;
+	zArray = z + 3;
 	//Since it's 4, 5, 6 for a GO8
 
 	//As logically sum of region coordinates = 0,
 	//Thus to make it 0 you have to add the opposite to the
 	//other coordinates. (opposite sign)
-	if (movedPoint.x+movedPoint.y+movedPoint.z == -2) {
+	if (x+y+z == -2) {
 		sign = 1;
 	} else {
 		sign = -1;
@@ -931,29 +930,29 @@ int *checkCampRegion (Game g, path pathToVertex) {
 	//Now to determine if the board is at the edge
 	//Since then it will only have two regions instead.
 	//Returns the regionIDs, if regionID = 19, there is no region there
-	if (abs (movedPoint.x) == 3) {
+	if (abs (x) == 3) {
 		region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
 		region[1] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
 		region[2] = 19;
-	} else if (abs (movedPoint.y) == 3) {
+	} else if (abs (y) == 3) {
 		region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
 		region[1] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
 		region[2] = 19;
-	} else if (abs (movedPoint.z) == 3) {
+	} else if (abs (z) == 3) {
 		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
 		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
 		region[2] = 19;
-	} else if (abs (movedPoint.x*movedPoint.y*movedPoint.z) == 8) {
-		if (movedPoint.x == movedPoint.y) {
+	} else if (abs (x*y*z) == 8) {
+		if (x == y) {
 			//Only one region in this few ones:
 			region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
 			region[1] = 19;
 			region[2] = 19;
-		} else if (movedPoint.x == movedPoint.z) {
+		} else if (x == z) {
 			region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
 			region[1] = 19;
 			region[2] = 19;
-		} else if (movedPoint.y == movedPoint.z) {
+		} else if (y == z) {
 			region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
 			region[1] = 19;
 			region[2] = 19;
