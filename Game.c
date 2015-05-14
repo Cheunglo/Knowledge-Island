@@ -638,7 +638,6 @@ int arcConditions (Game g, action a, int player) {
 	if ((getStudents (g, player, STUDENT_BPS) >= 1) 
 		&& (getStudents (g, player, STUDENT_BQN) >= 1)
 		&& (a.destination[0] != BACK)) { //doesn't move back into the sea
-		printf ("it went here!\n");
 		answer = TRUE;
 	} else {
 		answer = FALSE;
