@@ -547,6 +547,7 @@ int cmpsConditions (Game g, action a, int player) {
 	int answer = TRUE;
 	char *path = a.destination;
 	coord vertex = pathMovement (path);
+	coord adj = movement (vertex, BACK);
 
 	if ((getStudents (g, player, STUDENT_BPS) >= 1) 
 		&& (getStudents (g, player, STUDENT_BQN) >= 1)
@@ -567,6 +568,14 @@ int cmpsConditions (Game g, action a, int player) {
 		answer = FALSE;
 	}
 
+
+	//Checks for adjacent campuses which would be illegal
+	if (answer == TRUE
+		&& g->gameBoard.campus[adj.x][adj.y][adj.z] != NO_ONE) {
+		answer = FALSE;
+	}
+
+	//Check that it's an actual vertex
 	if (answer == TRUE
 		&& abs (vertex.x+vertex.y+vertex.z) != 2) {
 		answer = FALSE;
@@ -581,6 +590,8 @@ int G08Conditions (Game g, action a, int player) {
 	int answer = FALSE;
 	char *path = a.destination;
 	coord vertex = pathMovement (path);
+	coord adj = movement (vertex, BACK);
+
 
 	if ((getStudents (g, player, STUDENT_MJ) >= 2) 
 		&& (getStudents (g, player, STUDENT_MMONEY) >= 3)
@@ -601,6 +612,13 @@ int G08Conditions (Game g, action a, int player) {
 		answer = FALSE;
 	}
 
+	//Checks for adjacent campuses which would be illegal
+	if (answer == TRUE
+		&& g->gameBoard.campus[adj.x][adj.y][adj.z] != NO_ONE) {
+		answer = FALSE;
+	}
+
+
 	//Checks that it's a vertex
 	if (answer == TRUE
 		&& abs (vertex.x+vertex.y+vertex.z) != 2) {
@@ -609,6 +627,7 @@ int G08Conditions (Game g, action a, int player) {
 
 	return answer;
 }
+
 
 
 //Tests conditions for a spinoff, which is MJ+MTV+MMNY
