@@ -164,7 +164,7 @@ Game newGame (int discipline[], int dice[]) {
         g->uni[curPlayer].numStudents[STUDENT_MMONEY] = INITIAL_MMONEY;
 
         // initialises a player's resources and points
-        g->uni[curPlayer].numArcs = 0;
+        g->uni[curPlayer].numArcs = 4;
         g->uni[curPlayer].numCmps = 2;
         g->uni[curPlayer].numG08s = 0;
         g->uni[curPlayer].numPubs = 0;
