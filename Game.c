@@ -154,7 +154,7 @@ Game newGame (int discipline[], int dice[]) {
     // initialise players
     // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
     int curPlayer = UNI_A;
-    while (curPlayer < NUM_UNIS) {
+    while (curPlayer < NO_PLAYERS) {
         // initialises a player's students resources
         g->uni[curPlayer].numStudents[STUDENT_THD] = INITIAL_THD;
         g->uni[curPlayer].numStudents[STUDENT_BPS] = INITIAL_BPS;
