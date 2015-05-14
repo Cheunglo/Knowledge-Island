@@ -148,12 +148,12 @@ Game newGame (int discipline[], int dice[]) {
     }
 
     // initialise prestige awards
-    g->mostArcs = -1;
-    g->mostPubs = -1;
+    g->mostArcs = 0;
+    g->mostPubs = 0;
 
     // initialise players
     // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
-    int curPlayer = UNI_A-1;
+    int curPlayer = UNI_A;
     while (curPlayer < NUM_UNIS) {
         // initialises a player's students resources
         g->uni[curPlayer].numStudents[STUDENT_THD] = INITIAL_THD;
@@ -544,7 +544,7 @@ int isLegalAction (Game g, action a) {
 // and no two campuses can be on adjacent vertexes
 int cmpsConditions (Game g, action a, int player) {
 
-	int answer = FALSE;
+	int answer = TRUE;
 	char *path = a.destination;
 	coord vertex = pathMovement (path);
 
@@ -554,12 +554,11 @@ int cmpsConditions (Game g, action a, int player) {
 		&& (getStudents (g, player, STUDENT_MTV) >= 1)
 		&& (getCampus (g, a.destination) == VACANT_VERTEX)
 		&& (getARC (g, a.destination) != VACANT_ARC)) {
-
 		answer = TRUE;
 	} else {
 		answer = FALSE;
 	}
-
+	
 	//check if they're inside the boundaries
 	if (answer == TRUE
 		&& abs (vertex.x) >= 3
@@ -741,14 +740,9 @@ int getARC (Game g, path pathToEdge) {
 	int zPtB = 0;
 
 	edge arc; //Edge to be checked
-	//Assert that they will all add to +-2 to be a vertex, else region
 	arc.pointA = pathMovement (path);
-	assert (abs(arc.pointA.x+arc.pointA.y+arc.pointA.z) == 2);
 	arc.pointB = movement (arc.pointA, BACK);
-	assert (abs(arc.pointB.x+arc.pointB.y+arc.pointB.z) == 2);
 
-	//Sum of adjacent coordinates add to 0
-	assert (arc.pointA.x+arc.pointA.y+arc.pointA.z+arc.pointB.z == 0);
 
 	xPtA = arc.pointA.x + 3;
 	yPtA = arc.pointA.y + 3;
@@ -829,14 +823,14 @@ int getWhoseTurn (Game g){
 int getCampuses (Game g, int player) {
 
     //player 1 is position 0 and player 3 is position 2
-    return g->uni[player - 1].numCmps;
+    return g->uni[player].numCmps;
 }
 
 //get the number of IPS a player has
 int getIPs (Game g, int player) {
 
     //g is a pointer to a struct
-    return g->uni[player - 1].numIPs;
+    return g->uni[player].numIPs;
 }
 
 //gets the number of Publications that a player has
@@ -844,7 +838,7 @@ int getPublications (Game g, int player) {
 
     //g is a pointer to a struct
     //NB player 1 is position 0 and player 3 is position 2 in the array
-    return g->uni[player - 1].numPubs;
+    return g->uni[player].numPubs;
 }
 
 //gets the number of students a player has of a specific discipline
@@ -852,7 +846,7 @@ int getStudents (Game g, int player, int discipline) {
  
    //g is a pointer to a struct hence using "->" not "."
     // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
-    return g->uni[player - 1].numStudents[discipline];
+    return g->uni[player].numStudents[discipline];
 }
 
 //get the exchange rate for retraining a student
