@@ -71,6 +71,12 @@
 #define MOSTARC 10
 #define MOSTPUB 10
 
+#define TV "RR"                //MTV  retraining centre
+#define MONEY "LRL"            //MMONEY retraining centre
+#define ENGINEER "RLRRLLRLRL"  //BPS retraining centre
+#define SCIENCE "RLLRLRLRR"    //BQN retraining centre
+#define JOB "RLLRLRRLRLR"       //MJOBS retraining centre
+
 void testMakeAction (void);
 void testThrowDice (void);
 void testGetDiscipline (void);
@@ -1278,7 +1284,7 @@ void testgetExchangeRate (void) {
    }      
    printf ("set 1 of tests passed\n");
    printf ("testing when there are retraining centres\n");
-   action a, c;
+   action a, bT, bMON, bENG, bSCI, bJ, c, r1, r2;
    int k = 0;
    /*only UNI_C will build ARC to retraining centres as that player
      recieves either a BPS or a BQN which are needed to build ARC.
@@ -1290,13 +1296,48 @@ void testgetExchangeRate (void) {
    //random input
    a.disciplineFrom = STUDENT_MTV;
    a.disciplineTo = STUDENT_THD;
+   
+   bT.actionCode = BUILD_CAMPUS;
+   strcpy (bT.destination, TV);
+   bT.disciplineFrom = STUDENT_MTV;
+   bT.disciplineTo = STUDENT_THD;
+   
+   bMON.actionCode = BUILD_CAMPUS;
+   strcpy (bMON.destination, MONEY);
+   bMON.disciplineFrom = STUDENT_MTV;
+   bMON.disciplineTo = STUDENT_THD;
+   
+   bENG.actionCode = BUILD_CAMPUS;
+   strcpy (bENG.destination, ENGINEER);
+   bENG.disciplineFrom = STUDENT_MTV;
+   bENG.disciplineTo = STUDENT_THD;
+   
+   bSCI.actionCode = BUILD_CAMPUS;
+   strcpy (bSCI.destination, SCIENCE);
+   bSCI.disciplineFrom = STUDENT_MTV;
+   bSCI.disciplineTo = STUDENT_THD;
+   
+   bJ.actionCode = BUILD_CAMPUS;
+   strcpy (bJ.destination, JOB);
+   bJ.disciplineFrom = STUDENT_MTV;
+   bJ.disciplineTo = STUDENT_THD
 
    c.actionCode  = OBTAIN_ARC;
    //random input
    c.disciplineFrom = STUDENT_MTV;
    c.disciplineTo = STUDENT_THD;
    
-   while (k < 32) {
+   r1.actionCode = RETRAN_STUDENTS;
+   strcpy (r1.destination, " ");
+   r1.disciplineFrom = STUDENT_BPS;
+   r1.disciplineTo = STUDENT_MJ;
+   
+   r2.actionCode = RETRAN_STUDENTS;
+   strcpy (r2.destination, " ");
+   r2.disciplineFrom = STUDENT_BQN;
+   r2.disciplineTo = STUDENT_MTV;
+   
+   while (k < 99) {
       throwDice (g, 9);
       makeAction (g, a);
       k ++;
@@ -1304,11 +1345,13 @@ void testgetExchangeRate (void) {
 
    k = 0;
 
-   while (k < 32 ) {
+   while (k < 99 ) {
       throwDice (g, 5);
       makeAction (g, a);   
       k ++;
    }
+   throwDice (g, 10);
+   makeAction (g, a);
    throwDice (g, 10);
    makeAction (g, a);
    throwDice (g, 10);
@@ -1364,6 +1407,11 @@ void testgetExchangeRate (void) {
    makeAction (g, c);
    strcpy (c.destination, "RLLRLRRLRLR");
    makeAction (g, c);
+   makeAction (g, bT);
+   makeAction (g, bMON);
+   makeAction (g, bENG);
+   makeAction (g, bSCI);
+   makeAction (g, bJ);
    
    i = 1;
    j = 0;
