@@ -702,19 +702,19 @@ int retrainConditions (Game g, action a, int player) {
 int getKPIpoints (Game g, int player) {
 
 	int kpiPoints = 0;
-	
+
 	//Add KPI points from every object player owns
-	kpiPoints += g->uni[player].numArcs * ARCPTS;
-	kpiPoints += g->uni[player].numCmps * CAMPUSPTS;
-	kpiPoints += g->uni[player].numG08s * G08PTS;
-	kpiPoints += g->uni[player].numIPs * IPPTS;
+	kpiPoints += getARCs(g, player) * ARCPTS;
+	kpiPoints += getCampuses (g, player) * CAMPUSPTS;
+	kpiPoints += getGO8s (g, player) * G08PTS;
+	kpiPoints += getIPs (g, player) * IPPTS;
 
 	//Conditions for prestige KPI points
-	if (player == g->mostArcs) {
+	if (player == getMostARCs (g)) {
 		kpiPoints += MOSTARCPTS;
 	} 
 
-	if (player == g->mostPubs) {
+	if (player == getMostPublications (g)) {
 		kpiPoints += MOSTPUBPTS;
 	}
 
