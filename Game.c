@@ -7,7 +7,7 @@
 #include <math.h>
 #include <assert.h>
 #include <string.h>
-#include "Game-1.07.h"
+#include "Game.h"
 
 //Possible movements via path:
 #define LEFT 'L'
@@ -164,7 +164,7 @@ Game newGame (int discipline[], int dice[]) {
         g->uni[curPlayer].numStudents[STUDENT_MMONEY] = INITIAL_MMONEY;
 
         // initialises a player's resources and points
-        g->uni[curPlayer].numArcs = 4;
+        g->uni[curPlayer].numArcs = 0;
         g->uni[curPlayer].numCmps = 2;
         g->uni[curPlayer].numG08s = 0;
         g->uni[curPlayer].numPubs = 0;
@@ -220,18 +220,6 @@ void initializeBoard (Game g) {
 	g->gameBoard.arc[0][2][5][1][4][6] = UNI_C;
 	g->gameBoard.arc[1][4][6][0][2][5] = UNI_C;
 
-/*	//Initializing retraining center
-	g->gameBoard.retraining[1][1][5][2][3][6] = STUDENT_BPS;
-	g->gameBoard.retraining[2][3][6][1][1][5] = STUDENT_BPS;
-	g->gameBoard.retraining[5][1][1][6][2][3] = STUDENT_BQN;
-	g->gameBoard.retraining[6][2][3][5][1][1] = STUDENT_BQN;
-	g->gameBoard.retraining[5][1][5][4][1][3] = STUDENT_MJ;
-	g->gameBoard.retraining[4][1][3][5][1][5] = STUDENT_MJ;
-	g->gameBoard.retraining[1][5][1][3][6][2] = STUDENT_MTV;
-	g->gameBoard.retraining[3][6][2][1][5][1] = STUDENT_MTV;
-	g->gameBoard.retraining[5][5][1][3][4][0] = STUDENT_MMONEY;
-	g->gameBoard.retraining[3][4][0][5][5][1] = STUDENT_MMONEY;
-*/
 }
 
 
