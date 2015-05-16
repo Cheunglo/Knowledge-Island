@@ -528,7 +528,6 @@ void testIsLegalAction (void) {
 
 	printf ("Testing isLegalAction()...\n");
 
-	int plyr = UNI_A;
 	int rate = 0;
 	int counter = 0;
 	int noCampus = 0;
@@ -544,15 +543,20 @@ void testIsLegalAction (void) {
 	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
 
 	Game g = newGame (disciplines, dice);
+	int plyr = getWhoseTurn (g);
 	action a;
 	a.actionCode = 0;
+	char *path = "LR";
+	strcpy (a.destination, path);
 	a.disciplineFrom = 0;
 	a.disciplineTo = 0;
+	printf ("   New game initialized for testing.\n");
 
 	//Ensure that the game has already started
 	assert (isLegalAction (g, a) == FALSE);
 	throwDice (g, 3);
 	assert (isLegalAction (g, a) == TRUE);
+	printf ("   Game has indeed already started.\n");
 
 	//Ensure action codes are legal
 	a.actionCode = -1;
@@ -567,6 +571,7 @@ void testIsLegalAction (void) {
 	assert (isLegalAction (g, a) == FALSE);
 	a.actionCode = '?';
 	assert (isLegalAction (g, a) == FALSE);
+	printf ("   Action codes are legal.\n");
 
 	noCampus = getCampuses (g, plyr);
 
@@ -585,23 +590,8 @@ void testIsLegalAction (void) {
 
 	a.actionCode = PASS; //Always true when game has began
 	assert (isLegalAction (g, a) == TRUE);
+	printf ("   PASS action is definitely legal.\n");
 
-	a.actionCode = BUILD_CAMPUS; //Needs 1 of each but THD/M$
-	if ((stuTypes[1] > 0) && (stuTypes[2] > 0) && (stuTypes[3] > 0) && (stuTypes[4] > 0)){
-		if (getCampus (g, a.destination) == VACANT_VERTEX) {
-			assert (isLegalAction (g, a) == TRUE);
-		}
-	} else {
-		assert (isLegalAction (g, a) == FALSE);
-	}
-
-	a.actionCode = BUILD_GO8; //Needs a campus, 2MJs, 3M$ + one campus
-	noGO8s = getGO8s (g, plyr);
-	if ((stuTypes[3] >= 1) && (stuTypes[5] > 2) && (noCampus > 0) && (noGO8s < 8)){
-		assert (isLegalAction (g, a) == TRUE);
-	} else {
-		assert (isLegalAction (g, a) == FALSE);
-	}
 
 	//Ensure paths are well formed & legal (legal direction & length)
 	//Does not leave into the sea
@@ -622,6 +612,28 @@ void testIsLegalAction (void) {
 	} else {
 		assert (isLegalAction (g, a) == FALSE);
 	}
+	printf ("   ARC obtaining function is legally working.\n");
+	makeAction (g, a); //Make the arc so that we can build campus next
+
+	printf ("Stutypes: %d %d %d %d", stuTypes[1], stuTypes[2], stuTypes[3], stuTypes[4]);
+	a.actionCode = BUILD_CAMPUS; //Needs 1 of each but THD/M$
+	if ((stuTypes[1] > 0) && (stuTypes[2] > 0) && (stuTypes[3] > 0) && (stuTypes[4] > 0)){
+		if (getCampus (g, a.destination) == VACANT_VERTEX) {
+			assert (isLegalAction (g, a) == TRUE);
+		}
+	} else {
+		assert (isLegalAction (g, a) == FALSE);
+	}
+	printf ("   Build Campus legal function is working.\n");
+
+	a.actionCode = BUILD_GO8; //Needs a campus, 2MJs, 3M$ + one campus
+	noGO8s = getGO8s (g, plyr);
+	if ((stuTypes[3] >= 1) && (stuTypes[5] > 2) && (noCampus > 0) && (noGO8s < 8)){
+		assert (isLegalAction (g, a) == TRUE);
+	} else {
+		assert (isLegalAction (g, a) == FALSE);
+	}
+	printf ("   Build GO8 legal function is working.\n");
 
 	a.actionCode = START_SPINOFF;
 	if ((stuTypes[3] >= 0) && (stuTypes[4] > 0) && (stuTypes[5] > 0)){
@@ -629,12 +641,14 @@ void testIsLegalAction (void) {
 	} else {
 		assert (isLegalAction (g, a) == FALSE);
 	}
+	printf ("    Starting spinoff function is legally working.\n");
 
 	//Illegal for players to OBTAIN_PUBLICATION and OBTAIN_IP_PATENT
 	a.actionCode = OBTAIN_PUBLICATION;
 	assert (isLegalAction (g, a) == FALSE);
 	a.actionCode = OBTAIN_IP_PATENT;
 	assert (isLegalAction (g, a) == FALSE);
+	printf ("    Publications/IP function is legally working.\n");
 
 	//Testing for retraining action
 	//Ensure valid discipline numbers used
@@ -660,12 +674,14 @@ void testIsLegalAction (void) {
 	assert (isLegalAction (g, a) == FALSE);
 	a.disciplineFrom = '?';
 	assert (isLegalAction (g, a) == FALSE);
+	printf ("    Basic discipline testing is all legal.\n");
 
 	//Testing to ensure uni has enough students for retraining
 	//Testing THDs that cannot be retrained
 	a.disciplineTo = STUDENT_THD;
 	a.disciplineFrom = STUDENT_THD;
 	assert (isLegalAction (g, a) == FALSE);
+	printf ("    All student retraining codes function is legal.\n");
 
 	a.disciplineTo = 1;   //To avoid THDs (0) that cannot be retrained
 	a.disciplineFrom = 1;
@@ -683,7 +699,9 @@ void testIsLegalAction (void) {
 		}
 		a.disciplineFrom ++;
 	}
+	printf ("    Retraining function is legal.\n");
 
+	printf ("Checks completed, game being disposed...\n");
 	disposeGame (g); //Restarts the game for other testing.
 
 	printf ("...isLegalAction() passed all tests.\n");
