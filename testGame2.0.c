@@ -770,7 +770,7 @@ void testGetARCs (void) {
 	Game g = newGame (disciplines, dice);
 	action a;
 	int player = 0;
-	int numArcs[3] = {0};
+	int numArcs[4] = {0};
 
 	//Tests all new games start with 0, inlcuding NO_ONE
 	while (player < 4) {
