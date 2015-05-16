@@ -1023,9 +1023,6 @@ coord pathMovement (char * path) {
  */
 coord movement (coord point, char move) {
 
-	assert (point.direction >= 0);
-	assert (point.direction < NUM_DIRECTIONS);
-
 	coord newMove;
 	int sign = 0;
 	int dir = point.direction;
