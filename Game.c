@@ -118,7 +118,7 @@ int arcConditions (Game g, action a, int player);
 int spinoffConditions (Game g, action a, int player);
 int retrainConditions (Game g, action a, int player);
 int rollDice (void);
-int *checkCampRegion (Game g, int x, int y, int z);
+int *getRegion (Game g, int x, int y, int z);
 coord pathMovement (char * path);
 coord movement (coord point, char move); //single movements only
 
@@ -903,25 +903,24 @@ int rollDice (void) {
 
 //Returns a pointer to an array of three regions,
 //Each with a student value supposedly.
-int *checkCampRegion (Game g, int x, int y, int z) {
+//Assuming input x, y, z are in array form (coordinate +3)
+int *getRegion (Game g, int x, int y, int z) {
 
-	int xArray = 0;
-	int yArray = 0;
-	int zArray = 0;
+	//These variables are used to test the conditions:
+	int xCon = x-3;
+	int yCon = y-3;
+	int zCon = z-3;
 	int sign = 0;
 	//When coordinate > 0, the others are -+1.
 	int *region = malloc (3);
 	//Since there are max 3 regions covering vertex
 
-	xArray = x + 3;
-	yArray = y + 3;
-	zArray = z + 3;
 	//Since it's 4, 5, 6 for a GO8
 
 	//As logically sum of region coordinates = 0,
 	//Thus to make it 0 you have to add the opposite to the
 	//other coordinates. (opposite sign)
-	if (x+y+z == -2) {
+	if (xCon+yCon+zCon == -2) {
 		sign = 1;
 	} else {
 		sign = -1;
@@ -930,39 +929,44 @@ int *checkCampRegion (Game g, int x, int y, int z) {
 	//Now to determine if the board is at the edge
 	//Since then it will only have two regions instead.
 	//Returns the regionIDs, if regionID = 19, there is no region there
-	if (abs (x) == 3) {
-		region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
-		region[1] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+	if (abs (xCon) == 3 && abs (yCon) != 3 && abs (zCon) != 3) {
+		region[0] = g->gameBoard.region[x+sign][y][z+sign];
+		region[1] = g->gameBoard.region[x+sign][y+sign][z];
 		region[2] = 19;
-	} else if (abs (y) == 3) {
-		region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
-		region[1] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+	} else if (abs (yCon) == 3 && abs (xCon) != 3 && abs (zCon) != 3) {
+		region[0] = g->gameBoard.region[x+sign][y+sign][z];
+		region[1] = g->gameBoard.region[x][y+sign][z+sign];
 		region[2] = 19;
-	} else if (abs (z) == 3) {
-		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
-		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+	} else if (abs (zCon) == 3 && abs (yCon) != 3 && abs (xCon) != 3) {
+		region[0] = g->gameBoard.region[x][y+sign][z+sign];
+		region[1] = g->gameBoard.region[x+sign][y][z+sign];
 		region[2] = 19;
-	} else if (abs (x*y*z) == 8) {
+	} else if (abs (zCon) == 3 || abs (yCon) == 3 || abs (xCon) == 3) {
+		//This is most definitely the sea!
+		region[0] = 19;
+		region[1] = 19;
+		region[2] = 19;
+	} else if (abs (xCon*yCon*zCon) == 8) {
 		if (x == y) {
 			//Only one region in this few ones:
-			region[0] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+			region[0] = g->gameBoard.region[x+sign][y+sign][z];
 			region[1] = 19;
 			region[2] = 19;
 		} else if (x == z) {
-			region[0] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
+			region[0] = g->gameBoard.region[x+sign][y][z+sign];
 			region[1] = 19;
 			region[2] = 19;
 		} else if (y == z) {
-			region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
+			region[0] = g->gameBoard.region[x][y+sign][z+sign];
 			region[1] = 19;
 			region[2] = 19;
 		}
 	} else {
-		region[0] = g->gameBoard.region[xArray][yArray+sign][zArray+sign];
-		region[1] = g->gameBoard.region[xArray+sign][yArray][zArray+sign];
-		region[2] = g->gameBoard.region[xArray+sign][yArray+sign][zArray];
+		region[0] = g->gameBoard.region[x][y+sign][z+sign];
+		region[1] = g->gameBoard.region[x+sign][y][z+sign];
+		region[2] = g->gameBoard.region[x+sign][y+sign][z];
 	}
-	
+
 	return region;
 }
 
