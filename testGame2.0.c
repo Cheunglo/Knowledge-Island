@@ -803,7 +803,7 @@ void testGetGO8s (void) {
 	Game g = newGame (disciplines, dice);
 	action a;
 	int player = 0;
-	int numG08[3] = {0};
+	int numG08[4] = {0};
 
 	//Tests all new games start with 0, inlcuding NO_ONE
 	while (player < 4) {
