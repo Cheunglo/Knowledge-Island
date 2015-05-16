@@ -708,7 +708,6 @@ void testIsLegalAction (void) {
 	printf ("...isLegalAction() passed all tests.\n");
 }
 
-
 void testGetKPIpoints (void) {
 	//Test if function returns KPI points of specified player
 
@@ -723,34 +722,93 @@ void testGetKPIpoints (void) {
 
 	Game g = newGame (disciplines, dice);
 	action a;
-	int move = 0;
-	int player = 0;
-	int kpiPts[3] = {0};
-	int kpiValues[10] = {PASS, CAMPUS, G08, ARC, 0, 0, IP, 0, MOSTARC, MOSTPUB};
+	int player = UNI_A;
+	int kpiPts[4] = {0};
+	int kpiValues[10] = {0, CAMPUS, G08, ARC, 0, 0, IP, 0, MOSTARC, MOSTPUB};
 
 	//Tests all new games start with 0, inlcuding NO_ONE
+	printf ("Testing all initial conditions, KPI = 0.\n");
 	while (player < 4) {
-		assert (getKPIpoints (g, player) == 0);
+		assert (getKPIpoints (g, player) == 2*CAMPUS);
+		kpiPts[player] += 2*CAMPUS;
 		player ++;
 	}
+	printf ("All initial conditions are set, good.\n");
+
 
 	//Tests that players have correct KPI values for every move.
-	while (move < 8) {
-		player = getWhoseTurn (g);
-		a.actionCode = move;
-		makeAction (g, a);
-		kpiPts[player] += kpiValues[move];
-		assert (getKPIpoints (g, player) == kpiPts[player]);
-	}
+	printf ("   Testing PASS points...\n");
+	player = getWhoseTurn (g);
+	printf ("      Player ID: %d\n", player);
+	a.actionCode = PASS;
+	makeAction (g, a);
+	throwDice (g, 12);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
+	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     PASS points passed test.\n");
 
-	//Tests prestige KPI Points for most ARCs & Publications
+	printf ("   Testing for ARC building + ARC Prestige Points...\n");
+	player = getWhoseTurn (g);
+	a.actionCode = OBTAIN_ARC;
+	makeAction (g, a);
+	throwDice (g, 12);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
 	player = getMostARCs (g);
 	kpiPts[player] += MOSTARC;
 	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     ARC points score passed test.\n");
 
+	//Tests that players have correct KPI values for making campuses.
+	printf ("   Testing for Campuses building...\n");
+	player = getWhoseTurn (g);
+	printf ("      Player ID: %d\n", player);
+	a.actionCode = BUILD_CAMPUS;
+	makeAction (g, a);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
+	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     Simple Campus points passed test.\n");
+	a.actionCode = BUILD_GO8;
+	makeAction (g, a);
+	throwDice (g, 12);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
+	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     GO8 points passed test.\n");
+	printf ("   Campuses building points successful...\n");
+
+	printf ("   Testing for Spinoffs building...\n");
+	player = getWhoseTurn (g);
+	a.actionCode = START_SPINOFF;
+	makeAction (g, a);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
+	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     Spinoff points passed test.\n");
+
+	printf ("   Testing for obtaining IP Patents score...\n");
+	a.actionCode = OBTAIN_IP_PATENT;
+	makeAction (g, a);
+	throwDice (g, 12);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
+	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     IP points score passed test.\n");
+
+	printf ("   Testing for obtaining Publications + Publication Prestige Points...\n");
+	a.actionCode = OBTAIN_PUBLICATION;
+	makeAction (g, a);
+	throwDice (g, 12);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
 	player = getMostPublications (g);
 	kpiPts[player] += MOSTPUB;
 	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     Publications points passed test.\n");
+
+	printf ("   Testing for Retraining...\n");
+	player = getWhoseTurn (g);
+	a.actionCode = RETRAIN_STUDENTS;
+	makeAction (g, a);
+	throwDice (g, 12);
+	kpiPts[player] = kpiPts[player] + kpiValues[a.actionCode];
+	assert (getKPIpoints (g, player) == kpiPts[player]);
+	printf ("     Retraining points passed test.\n");
 
 	disposeGame(g);
 	printf ("...All tests for getKPIpoints() passed.\n");
