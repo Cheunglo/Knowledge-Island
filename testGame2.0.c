@@ -615,7 +615,6 @@ void testIsLegalAction (void) {
 	printf ("   ARC obtaining function is legally working.\n");
 	makeAction (g, a); //Make the arc so that we can build campus next
 
-	printf ("Stutypes: %d %d %d %d", stuTypes[1], stuTypes[2], stuTypes[3], stuTypes[4]);
 	a.actionCode = BUILD_CAMPUS; //Needs 1 of each but THD/M$
 	if ((stuTypes[1] > 0) && (stuTypes[2] > 0) && (stuTypes[3] > 0) && (stuTypes[4] > 0)){
 		if (getCampus (g, a.destination) == VACANT_VERTEX) {
