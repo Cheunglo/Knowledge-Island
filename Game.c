@@ -34,7 +34,7 @@
 
 //KPI Value of each move:
 #define CAMPUSPTS 10
-#define G08PTS 10    //Only 10 points added to previous 10 pts of campus
+#define G08PTS 20
 #define ARCPTS 2
 #define SPINOFFPTS 0 //Will have effect only if pub/ip.
 #define PUBPTS 0     //Only prestige, no actual points
