@@ -16,7 +16,6 @@
 #define NUM_DIRECTIONS 6
 //Number of coordinates in x, y, z plane, -3to3
 #define COORD 7 
-#define REGIONCOORD 6
 
 //Maximum values of items
 #define MAX_KPIPTS 150
@@ -78,7 +77,7 @@ typedef struct _board {
 	//Stores campus player code
 	//Regular campuses are 1, 2, 3 but G08s are 4, 5, 6
 	int campus[COORD][COORD][COORD];
-	int region[REGIONCOORD][REGIONCOORD][REGIONCOORD];
+	int region[COORD][COORD][COORD];
 	//Stores arc player code
 	//Each arc will have two copies, since an arc is between two
 	//points, hence points A - B and B - A
