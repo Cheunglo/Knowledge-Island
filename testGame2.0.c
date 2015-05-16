@@ -10,7 +10,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "Game-1.07.h"
+#include "Game.h"
 
 #define LEFT 'L'
 #define RIGHT 'R'
@@ -1320,19 +1320,19 @@ void testgetExchangeRate (void) {
    bJ.actionCode = BUILD_CAMPUS;
    strcpy (bJ.destination, JOB);
    bJ.disciplineFrom = STUDENT_MTV;
-   bJ.disciplineTo = STUDENT_THD
+   bJ.disciplineTo = STUDENT_THD;
 
    c.actionCode  = OBTAIN_ARC;
    //random input
    c.disciplineFrom = STUDENT_MTV;
    c.disciplineTo = STUDENT_THD;
    
-   r1.actionCode = RETRAN_STUDENTS;
+   r1.actionCode = RETRAIN_STUDENTS;
    strcpy (r1.destination, " ");
    r1.disciplineFrom = STUDENT_BPS;
    r1.disciplineTo = STUDENT_MJ;
    
-   r2.actionCode = RETRAN_STUDENTS;
+   r2.actionCode = RETRAIN_STUDENTS;
    strcpy (r2.destination, " ");
    r2.disciplineFrom = STUDENT_BQN;
    r2.disciplineTo = STUDENT_MTV;
