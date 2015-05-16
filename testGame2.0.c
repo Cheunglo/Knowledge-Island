@@ -101,6 +101,8 @@ int main (int argc, char *argv[]) {
 
 	//Tests that have passed:
 	testGetARCs (); 
+	testGetDiscipline ();
+	testGetDiceValue (); 
 	testThrowDice ();
 	testGetMostARCS ();
 	testGetCampus ();
@@ -108,21 +110,18 @@ int main (int argc, char *argv[]) {
 	testGetTurnNUmber ();
 	testGetWhoseTurn ();
 	testIsLegalAction ();
-
+	testGetGO8s ();
+	testGetKPIpoints ();
+	
 	//Failed:
    	testgetStudents ();
 	testMakeAction ();
-	testGetKPIpoints ();
 	testgetExchangeRate ();
 	testgetPublications ();
 	testGetARC (); 
 	testgetIPs (); 
 	testgetCampuses ();
-	testGetGO8s ();
 
-	//Infinite loops:
-	testGetDiscipline ();
-	testGetDiceValue (); 
 
    printf ("\n~~**All tests passed!**~~\n");
 
