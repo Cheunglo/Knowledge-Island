@@ -397,7 +397,7 @@ void makeCampus (Game g, char * path, int player) {
 	coord movedPoint;
 
 	movedPoint = pathMovement (path);
-	assert (abs(movedPoint.x+movedPoint.y+movedPoint.z) == 2);
+
 	//Save the player code into the array
 	xArray = movedPoint.x + 3;
 	yArray = movedPoint.y + 3;
