@@ -242,6 +242,7 @@ void testGetDiscipline (void) {
    printf ("testing all regions with a loop...");
    while (i < NUM_REGIONS) {
       assert (getDiscipline(g, i) == disciplines[i]);
+      i++;
    }
    printf ("...passed!\n");
    disposeGame (g);
@@ -266,6 +267,7 @@ void testGetDiceValue (void) {
    printf ("testing all regions with a loop...");
    while (i < NUM_REGIONS) {
       assert (getDiceValue(g, i) == dice[i]);
+      i++;
    }
    printf ("...passed!\n");
    disposeGame (g);
