@@ -147,8 +147,8 @@ Game newGame (int discipline[], int dice[]) {
     }
 
     // initialise prestige awards
-    g->mostArcs = 0;
-    g->mostPubs = 0;
+    g->mostArcs = NO_ONE;
+    g->mostPubs = NO_ONE;
 
     // initialise players
     // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
