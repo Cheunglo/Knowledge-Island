@@ -16,50 +16,6 @@
 #define RIGHT 'R'
 #define BACK 'B'
 
-#define NUM_UNIS 3
-/*
-// player ID of each university
-#define NO_ONE 0
-#define UNI_A 1
-#define UNI_B 2
-#define UNI_C 3
-// contents of an ARC
-#define VACANT_ARC 0
-#define ARC_A 1
-#define ARC_B 2
-#define ARC_C 3
-// contents of a VERTEX
-#define VACANT_VERTEX 0
-#define CAMPUS_A 1
-#define CAMPUS_B 2
-#define CAMPUS_C 3
-#define GO8_A 4
-#define GO8_B 5
-#define GO8_C 6
-// action codes
-#define PASS 0
-#define BUILD_CAMPUS 1
-#define BUILD_GO8 2
-#define OBTAIN_ARC 3
-#define START_SPINOFF 4
-#define OBTAIN_PUBLICATION 5
-#define OBTAIN_IP_PATENT 6
-#define RETRAIN_STUDENTS 7
-// disciplines
-#define STUDENT_THD 0
-#define STUDENT_BPS 1
-#define STUDENT_BQN 2
-#define STUDENT_MJ  3
-#define STUDENT_MTV 4
-#define STUDENT_MMONEY 5
-#define NUM_REGIONS 19
-#define PATH_LIMIT 150
-#define TRUE 1
-#define FALSE 0
-*/
-
-
-
 //KPI Value of each move:
 #define CAMPUS 10
 #define G08 10    //Only 10 points added to previous 10 pts of campus
@@ -130,8 +86,6 @@ int main (int argc, char *argv[]) {
 
 void testMakeAction (void) {
 
-	char *path = NULL;
-
 	int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
                 STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
@@ -139,59 +93,85 @@ void testMakeAction (void) {
                 STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
 	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
 
-   printf ("\n~~testing makeAction()~~\n");
+   	printf ("\n~~testing makeAction()~~\n");
+	Game g = newGame (disciplines, dice);
+	action a;
+	char *path = NULL;
+	int preBPS_C = 0;
 
-   printf ("testing action code 1: PASS...");
-   Game g = newGame (disciplines, dice);
-   action a;
-   throwDice (g, 10);
-   a.actionCode = PASS;
-   makeAction (g, a);
-   assert (getWhoseTurn (g) == UNI_B);
-   disposeGame (g);
-   printf ("...passed!\n");
+  	printf ("testing action code 0: PASS...");
+   	throwDice (g, 10);
+   	a.actionCode = PASS;
+   	makeAction (g, a);
+   	assert (getWhoseTurn (g) == UNI_B);
+	a.actionCode = PASS;
+	makeAction (g, a);
+	assert (getWhoseTurn (g) == UNI_C);
+	a.actionCode = PASS;
+	makeAction (g, a);
+	assert (getWhoseTurn (g) == UNI_A);
+   	printf ("...passed!\n");
 
-   g = newGame (disciplines, dice);
-   throwDice (g, 10);
-   printf ("testing action code 3: OBTAIN_ARC...");
-   a.actionCode = OBTAIN_ARC;
-   path = "RL";
-   strcpy (a.destination, path);
-   makeAction (g, a);
-   assert (getARCs (g, UNI_A) == 3);
-   printf ("...passed!\n");
-   printf ("testing action code 1: BUILD_CAMPUS...");
-   a.actionCode = BUILD_CAMPUS;
-   makeAction (g, a);
-   assert (getCampuses (g, UNI_A) == 3);
-   printf ("...passed!\n");
-   printf ("testing action code 2: BUILD_GO8...");
-   a.actionCode = BUILD_GO8;
+	printf ("testing action code 1: BUILD_CAMPUS...");
+	a.actionCode = BUILD_CAMPUS;
+	path = "RLRL";
+	strcpy (a.destination, path);
+	makeAction (g, a);
+	assert (getCampuses (g, UNI_A) == 3);
+	throwDice (g, 10);
+	a.actionCode = BUILD_CAMPUS;
+	path = "RLRLRL";
+	strcpy (a.destination, path);
+	makeAction (g, a);
+	assert (getCampuses (g, UNI_B) == 3);
+	printf ("...passed!\n");
 
-   makeAction (g, a);
-   assert (getGO8s (g, UNI_A) == 1);
-   printf ("...passed!\n");
-   printf ("testing action code 5: START_PUBLICATION...");
-   a.actionCode = OBTAIN_PUBLICATION;
-   makeAction (g, a);
-   assert (getPublications (g, UNI_A) == 1);
-   printf ("...passed!\n");
-   printf ("testing action code 6: OBTAIN_IP_PATENT...");
-   a.actionCode = OBTAIN_IP_PATENT;
-   makeAction (g, a);
-   assert (getIPs (g, UNI_B) == 1);
-   printf ("...passed!\n");
-   printf ("testing action code 7: RETRAIN_STUDENTS...");
-   // testing actionCode 'RETRAIN_STUDENTS'
-   a.actionCode = RETRAIN_STUDENTS;
-   a.disciplineFrom = STUDENT_BQN;
-   a.disciplineTo = STUDENT_BPS;
-   makeAction (g, a);
-   assert (getStudents (g, UNI_A, STUDENT_BPS) == 1);
-   printf ("...passed!");
-   disposeGame (g);
+	printf ("testing action code 2: BUILD_GO8...");
+	a.actionCode = BUILD_GO8;
+	path = "RLRLRL";
+	strcpy (a.destination, path);
+	makeAction (g, a);
+	assert (getGO8s (g, UNI_B) == 1);
+	printf ("...passed!\n");
 
-   printf ("\n~~all tests for makeAction() passed!~~\n");
+   	printf ("testing action code 3: OBTAIN_ARC...");
+   	a.actionCode = OBTAIN_ARC;
+   	path = "RL";
+   	strcpy (a.destination, path);
+   	makeAction (g, a);
+   	assert (getARCs (g, UNI_B) == 1);
+	throwDice (g, 10);
+	a.actionCode = OBTAIN_ARC;
+	path = "RLLR";
+	strcpy (a.destination, path);
+	makeAction (g, a);
+	assert (getARCs (g, UNI_C) == 1);
+   	printf ("...passed!\n");
+
+   	printf ("testing action code 5: START_PUBLICATION...");
+   	a.actionCode = OBTAIN_PUBLICATION;
+   	makeAction (g, a);
+   	assert (getPublications (g, UNI_C) == 1);
+   	printf ("...passed!\n");
+
+   	printf ("testing action code 6: OBTAIN_IP_PATENT...");
+   	a.actionCode = OBTAIN_IP_PATENT;
+   	makeAction (g, a);
+   	assert (getIPs (g, UNI_C) == 1);
+   	printf ("...passed!\n");
+
+   	printf ("testing action code 7: RETRAIN_STUDENTS..." );
+	preBPS_C = getStudents (g, UNI_C, STUDENT_BPS);
+   	a.actionCode = RETRAIN_STUDENTS;
+   	a.disciplineFrom = STUDENT_BQN;
+   	a.disciplineTo = STUDENT_BPS;
+   	makeAction (g, a);
+   	assert (getStudents (g, UNI_C, STUDENT_BPS) == preBPS_C + 1);
+   	printf ("...passed!");
+
+   	disposeGame (g);
+
+   	printf ("\n~~all tests for makeAction() passed!~~\n");
 
 }
 
@@ -204,74 +184,130 @@ void testThrowDice (void) {
                 STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
 	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
 
-   printf ("\n~~testing throwDice()~~\n");
+   	printf ("\n~~testing throwDice()~~\n");
+	Game g = newGame (disciplines, dice);
+	action a;
+	char *path = NULL;
+	int preBPS_B, preBQN_B, preMJ_A, preMJ_C, preMTV_A, preMTV_B, preMTV_C,
+		preMMONEY_A, preMMONEY_B, preMMONEY_C, preTHD_A, preTHD_B, preTHD_C;
 
-   Game g = newGame (disciplines, dice);
-   printf ("testing turn 1...");
-   throwDice (g, 10);
-   assert (getWhoseTurn (g) == UNI_A);
-   printf ("...passed!\n");
-   printf ("testing turn 2...");
-   throwDice (g, 10);
-   assert (getWhoseTurn (g) == UNI_B);
-   printf ("...passed!\n");
-   printf ("testing turn 3...");
-   throwDice (g, 10);
-   assert (getWhoseTurn (g) == UNI_C);
-   printf ("...passed!\n");
-   disposeGame (g);
+	printf ("testing turn 1 & diceScore 11...");
+	preMTV_A = getStudents (g, UNI_A, STUDENT_MTV);
+	throwDice (g, 11);
+	assert (getWhoseTurn(g) == UNI_A);
+	assert (getStudents (g, UNI_A, STUDENT_MTV) == preMTV_A + 1);
+	//Builds a GO8 for UNI_A for later testing
+	a.actionCode = BUILD_GO8;
+	path = "LRRLRL";
+	strcpy (a.destination, path);
+	makeAction (g, a);
+   	printf ("..passed!\n");
 
-   printf ("\n~~all tests for throwDice() passed!~~\n");
+   	printf ("testing turn 2 & diceScore 9...");
+	preBQN_B = getStudents (g, UNI_B, STUDENT_BQN);
+	preMJ_A = getStudents (g, UNI_A, STUDENT_MJ);
+	throwDice (g, 9);
+	assert (getWhoseTurn(g) == UNI_B);
+	assert (getStudents (g, UNI_B, STUDENT_BQN) == preBQN_B + 1);
+	assert (getStudents (g, UNI_A, STUDENT_MJ) == preMJ_A + 2);
+	//Builds a GO8 for UNI_A for later testing
+	a.actionCode = BUILD_GO8;
+	path = "RLRLR";
+	strcpy (a.destination, path);
+	makeAction (g, a);
+   	printf ("...passed!\n");
+
+   	printf ("testing turn 3 & diceScore 8...");
+	preMJ_C = getStudents (g, UNI_C, STUDENT_MJ);
+	preMTV_C = getStudents (g, UNI_C, STUDENT_MTV);
+	throwDice (g, 8);
+	assert (getWhoseTurn(g) == UNI_C);
+	assert (getStudents (g, UNI_C, STUDENT_MJ) == preMJ_C + 1);
+	assert (getStudents (g, UNI_C, STUDENT_MTV) == preMTV_C + 1);
+   	printf ("...passed!\n");
+
+	printf ("testing turn 4 & diceScore 5...");
+	preBPS_B = getStudents (g, UNI_B, STUDENT_BPS);
+	throwDice (g, 5);
+	assert (getWhoseTurn(g) == UNI_A);
+	assert (getStudents (g, UNI_B, STUDENT_BPS) == preBPS_B + 3);
+	printf ("...passed!\n");
+
+	printf ("testing turn 5 & diceScore 7...");
+	preTHD_A = getStudents (g, UNI_A, STUDENT_THD);
+	preTHD_B = getStudents (g, UNI_B, STUDENT_THD);
+	preTHD_C = getStudents (g, UNI_C, STUDENT_THD);
+	preMTV_A = getStudents (g, UNI_A, STUDENT_MTV);
+	preMTV_B = getStudents (g, UNI_B, STUDENT_MTV);
+	preMTV_C = getStudents (g, UNI_C, STUDENT_MTV);
+	preMMONEY_A = getStudents (g, UNI_A, STUDENT_MMONEY);
+	preMMONEY_B = getStudents (g, UNI_B, STUDENT_MMONEY);
+	preMMONEY_C = getStudents (g, UNI_C, STUDENT_MMONEY);
+	throwDice (g, 7);
+	assert (getWhoseTurn(g) == UNI_B);
+	assert (getStudents (g, UNI_A, STUDENT_MTV) == 0);
+	assert (getStudents (g, UNI_B, STUDENT_MTV) == 0);
+	assert (getStudents (g, UNI_C, STUDENT_MTV) == 0);
+	assert (getStudents (g, UNI_A, STUDENT_MMONEY) == 0);
+	assert (getStudents (g, UNI_B, STUDENT_MMONEY) == 0);
+	assert (getStudents (g, UNI_C, STUDENT_MMONEY) == 0);
+	assert (getStudents (g, UNI_A, STUDENT_THD) == preTHD_A + preMTV_A + preMMONEY_A + 2);
+	assert (getStudents (g, UNI_B, STUDENT_THD) == preTHD_B + preMTV_B + preMMONEY_B);
+	assert (getStudents (g, UNI_C, STUDENT_THD) == preTHD_C + preMTV_C + preMMONEY_C);
+	printf ("...passed!\n");
+
+	disposeGame (g);
+   	printf ("~~all tests for throwDice() passed!~~\n");
 
 }
 
 void testGetDiscipline (void) {
 
-   printf ("\n~~testing getDiscipline()~~\n");
+   	printf ("\n~~testing getDiscipline()~~\n");
 
-   int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
+	int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
                 STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
                 STUDENT_MJ, STUDENT_BQN, STUDENT_THD, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
 	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
 
-   Game g = newGame (disciplines, dice);
-   int i = 0;
-   printf ("testing all regions with a loop...");
-   while (i < NUM_REGIONS) {
-      assert (getDiscipline(g, i) == disciplines[i]);
-      i++;
-   }
-   printf ("...passed!\n");
-   disposeGame (g);
+   	Game g = newGame (disciplines, dice);
+   	int i = 0;
+   	printf ("testing all regions with a loop...");
+   	while (i < NUM_REGIONS) {
+      	assert (getDiscipline(g, i) == disciplines[i]);
+		i++;
+   	}
+   	printf ("...passed!\n");
+   	disposeGame (g);
 
-   printf ("\n~~all tests for getDiscipline() passed!~~\n");
+	printf ("~~all tests for getDiscipline() passed!~~\n");
 
 }
 
 void testGetDiceValue (void) {
 
-   printf ("\n~~testing getDiceValue()~~\n");
+	printf ("\n~~testing getDiceValue()~~\n");
 
-   int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
-                STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
-                STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
-                STUDENT_MJ, STUDENT_BQN, STUDENT_THD, STUDENT_MJ,\
-                STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
+	int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
+			STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
+			STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
+			STUDENT_MJ, STUDENT_BQN, STUDENT_THD, STUDENT_MJ,\
+			STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
 	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
 
-   Game g = newGame (disciplines, dice);
-   int i = 0;
-   printf ("testing all regions with a loop...");
-   while (i < NUM_REGIONS) {
-      assert (getDiceValue(g, i) == dice[i]);
-      i++;
-   }
-   printf ("...passed!\n");
-   disposeGame (g);
+   	Game g = newGame (disciplines, dice);
+   	int i = 0;
+   	printf ("testing all regions with a loop...");
+   	while (i < NUM_REGIONS) {
+		assert (getDiceValue(g, i) == dice[i]);
+		i++;
+   	}
+   	printf ("...passed!\n");
+   	disposeGame (g);
 
-   printf ("\n~~getDiceValue has passed!~~\n");
+   	printf ("~~getDiceValue has passed!~~\n");
 
 }
 
