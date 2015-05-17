@@ -308,7 +308,6 @@ void throwDice (Game g, int diceScore) {
 
     // advances the game to next turn
     g->currentTurn++;
-    int curPlayer = 0;
 
     // to obtain the regionID/location of the diceScore/diceValue
     int i = 0;
@@ -323,10 +322,10 @@ void throwDice (Game g, int diceScore) {
 
     // whenever a 7 is thrown, immediately after any new students are produced,
     // all MTV and MMONEY students of all universities decide to switch to ThD's.
+	int curPlayer = 0;
     if (diceScore == 7) {
-        // 1<=player<=3 but array is from 0 to 2 so minus 1 to rectify
 		curPlayer = UNI_A;
-        while (curPlayer < NUM_UNIS) {
+        while (curPlayer < NO_PLAYERS) {
             g->uni[curPlayer].numStudents[STUDENT_THD] += g->uni[curPlayer].numStudents[STUDENT_MTV] +
                                                           g->uni[curPlayer].numStudents[STUDENT_MMONEY];
             g->uni[curPlayer].numStudents[STUDENT_MTV] = 0;
@@ -428,26 +427,27 @@ void addStudents (Game g, int regionID) {
     int x = 0;
     int y = 0;
     int z = 0;
-    int curPlayer = UNI_A-1;
+    int curPlayer = UNI_A;
     int curVertex = g->gameBoard.campus[x][y][z];
-    int *regionSurround = checkCampRegion (g, x, y, z);
-    
-    while (x < 6) {
-    	while (y < 6) {
-    		while (z < 6) {
+    int *regionSurround = getRegion (g, x, y, z);
+
+    while (x < COORD) {
+    	while (y < COORD) {
+    		while (z < COORD) {
                 curVertex = g->gameBoard.campus[x][y][z];
     			if (curVertex > 0) {
-                    regionSurround = checkCampRegion (g, x, y, z);
+                    regionSurround = getRegion (g, x, y, z);
                     i = 0;
-                    while (i < 3 && regionSurround[i] == regionID) {
-                        //mod curVertex by 4 to obtain value between 0-2
-                        //since curVertex is 1-6
-                        curPlayer = curVertex % 4;
-                        if (curVertex >= 1 && curVertex <= 3) {
-                            g->uni[curPlayer].numStudents[getDiscipline(g, regionID)]++;
-                        } else if (curVertex >= 4 && curVertex <= 6) {
-                            g->uni[curPlayer].numStudents[getDiscipline(g, regionID)] += 2;
-                        }
+                    while (i < 3) {
+						if (regionSurround[i] == regionID) {
+	                        if (curVertex >= 1 && curVertex <= 3) {
+								curPlayer = curVertex;
+	                            g->uni[curPlayer].numStudents[getDiscipline(g, regionID)]++;
+	                        } else {
+								curPlayer = curVertex - 3;
+	                            g->uni[curPlayer].numStudents[getDiscipline(g, regionID)]+=2;
+	                        }
+						}
                         i++;
                     }
                 }
@@ -459,7 +459,7 @@ void addStudents (Game g, int regionID) {
         y = 0;
         x++;
     }
-    
+
     free (regionSurround);
 }
 
@@ -929,34 +929,35 @@ int *getRegion (Game g, int x, int y, int z) {
 	//Now to determine if the board is at the edge
 	//Since then it will only have two regions instead.
 	//Returns the regionIDs, if regionID = 19, there is no region there
-	if (abs (xCon) == 3 && abs (yCon) != 3 && abs (zCon) != 3) {
+	if (abs (xCon) == 3 && (abs (yCon) == 1 || abs (yCon) == 0)
+		&& (abs (zCon) == 1 || abs (zCon) == 0)) {
 		region[0] = g->gameBoard.region[x+sign][y][z+sign];
 		region[1] = g->gameBoard.region[x+sign][y+sign][z];
 		region[2] = 19;
-	} else if (abs (yCon) == 3 && abs (xCon) != 3 && abs (zCon) != 3) {
+	} else if (abs (yCon) == 3 && (abs (xCon) == 1 || abs (xCon) == 0)
+			   && (abs (zCon) == 1 || abs (zCon) == 0)) {
 		region[0] = g->gameBoard.region[x+sign][y+sign][z];
 		region[1] = g->gameBoard.region[x][y+sign][z+sign];
 		region[2] = 19;
-	} else if (abs (zCon) == 3 && abs (yCon) != 3 && abs (xCon) != 3) {
+	} else if (abs (zCon) == 3 && (abs (xCon) == 1 || abs (xCon) == 0)
+			   && (abs (yCon) == 1 || abs (yCon) == 0)) {
 		region[0] = g->gameBoard.region[x][y+sign][z+sign];
 		region[1] = g->gameBoard.region[x+sign][y][z+sign];
 		region[2] = 19;
-	} else if (abs (zCon) == 3 || abs (yCon) == 3 || abs (xCon) == 3) {
-		//This is most definitely the sea!
-		region[0] = 19;
-		region[1] = 19;
-		region[2] = 19;
-	} else if (abs (xCon*yCon*zCon) == 8) {
-		if (x == y) {
+	} else if ((abs (xCon*yCon*zCon) == 8) || (abs (xCon*yCon*zCon) == 6)) {
+		if ((xCon == yCon) || (abs (zCon) == 2 &&
+			(abs (xCon) == 1 || abs (xCon) == 3))) {
 			//Only one region in this few ones:
 			region[0] = g->gameBoard.region[x+sign][y+sign][z];
 			region[1] = 19;
 			region[2] = 19;
-		} else if (x == z) {
+		} else if ((xCon == zCon) || (abs (yCon) == 2 &&
+			       (abs (xCon) == 1 || abs (xCon) == 3))) {
 			region[0] = g->gameBoard.region[x+sign][y][z+sign];
 			region[1] = 19;
 			region[2] = 19;
-		} else if (y == z) {
+		} else if ((yCon == zCon) || (abs (xCon) == 2 &&
+				   (abs (yCon) == 1 || abs (yCon) == 3)))  {
 			region[0] = g->gameBoard.region[x][y+sign][z+sign];
 			region[1] = 19;
 			region[2] = 19;
