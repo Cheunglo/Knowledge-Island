@@ -1073,9 +1073,7 @@ void testgetPublications (void) {
 void testgetStudents (void) {
    printf ("Testing getStudents\n");
    printf ("It returns no. Students of a specific class a player has.\n");
-   printf ("First set of tests:\n");
-   printf ("Each player getting and Student every turn");
-   
+
    int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
                 STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
@@ -1085,87 +1083,91 @@ void testgetStudents (void) {
 
    Game g = newGame (disciplines, dice);
    int index = 0;
-   int indexA1 = 0;
-   int indexA2 = 0;
-   int indexB1 = 0;
-   int indexB2 = 0;
-   int indexC1 = 0;
-   int indexC2 = 0;
-   
-   assert (getStudents (g, UNI_A, STUDENT_THD) == 0);
-   assert (getStudents (g, UNI_A, STUDENT_BPS) == 3);
-   assert (getStudents (g, UNI_A, STUDENT_BQN) == 3);
-   assert (getStudents (g, UNI_A, STUDENT_MJ) == 1);
-   assert (getStudents (g, UNI_A, STUDENT_MTV) == 1);
-   assert (getStudents (g, UNI_A, STUDENT_MMONEY) == 1);
-   
-   assert (getStudents (g, UNI_B, STUDENT_THD) == 0);
-   assert (getStudents (g, UNI_B, STUDENT_BPS) == 3);
-   assert (getStudents (g, UNI_B, STUDENT_BQN) == 3);
-   assert (getStudents (g, UNI_B, STUDENT_MJ) == 1);
-   assert (getStudents (g, UNI_B, STUDENT_MTV) == 1);
-   assert (getStudents (g, UNI_B, STUDENT_MMONEY) == 1);           
-   
-   assert (getStudents (g, UNI_C, STUDENT_THD) == 0);
-   assert (getStudents (g, UNI_C, STUDENT_BPS) == 3);
-   assert (getStudents (g, UNI_C, STUDENT_BQN) == 3);
-   assert (getStudents (g, UNI_C, STUDENT_MJ) == 1);
-   assert (getStudents (g, UNI_C, STUDENT_MTV) == 1);
-   assert (getStudents (g, UNI_C, STUDENT_MMONEY) == 1);   
-   
-   while (index < 12) {
-      if ((index % 2) == 0) {
-         throwDice (g, 11);
-         indexA1 ++;
-      } else {
-         throwDice (g, 6);
-         indexA2 ++;
-      }
-   
-      assert (getStudents (g, UNI_A, STUDENT_THD) == 0);
-      assert (getStudents (g, UNI_A, STUDENT_BPS) == 3);
-      assert (getStudents (g, UNI_A, STUDENT_BQN) == 3);
-      assert (getStudents (g, UNI_A, STUDENT_MJ) == indexA2 + 1);
-      assert (getStudents (g, UNI_A, STUDENT_MTV) == indexA1 + 1);
-      assert (getStudents (g, UNI_A, STUDENT_MMONEY) == 1);
-   
-      if ((index % 2) == 0) {
-         throwDice (g, 9);
-         indexB1 ++;
-      } else {
-         throwDice (g, 5);
-         indexB2 ++;
-      }
-   
-      assert (getStudents (g, UNI_B, STUDENT_THD) == 0);
-      assert (getStudents (g, UNI_B, STUDENT_BPS) == indexB2 + 3);
-      assert (getStudents (g, UNI_B, STUDENT_BQN) == indexB1 + 3);
-      assert (getStudents (g, UNI_B, STUDENT_MJ) == 1);
-      assert (getStudents (g, UNI_B, STUDENT_MTV) == 1);
-      assert (getStudents (g, UNI_B, STUDENT_MMONEY) == 1);
-   
-      if ((index % 2) == 0) {
-         throwDice (g, 8);
-         indexC1 ++;
-      } else {
-         throwDice (g, 8);
-         indexC2 ++;
-      }
-   
-      assert (getStudents (g, UNI_C, STUDENT_THD) == 0);
-      assert (getStudents (g, UNI_C, STUDENT_BPS) == 3);
-      assert (getStudents (g, UNI_C, STUDENT_BQN) == 3);
-      assert (getStudents (g, UNI_C, STUDENT_MJ) == indexC1 + 1);
-      assert (getStudents (g, UNI_C, STUDENT_MTV) == indexC2 + 1);
-      assert (getStudents (g, UNI_C, STUDENT_MMONEY) == 1);
+   int player = UNI_A;
 
-      index ++;         
-   }
-   printf ("Set 1 of tests passed\n Starting second set of tests\n");
-   printf ("Retraining Students.\n");
+   //Array to record the number of students
+   int stuTypes[4][6] = {{0, 0, 0, 0, 0, 0}, \
+   						{0, 3, 3, 1, 1, 1}, \
+   						{0, 3, 3, 1, 1, 1}, \
+   						{0, 3, 3, 1, 1, 1}};
+
+
+   	printf ("   Testing initial conditions...\n");
+   	while (player < 4){
+   		while (index < 6) {
+   			assert (getStudents (g, player, index) == stuTypes[player][index]);
+   			index ++;
+   		}
+   		player ++;
+   	}
+   	printf ("   Initial conditions are set correctly.\n");
+
+   	printf ("  First set of tests:\n");
+   	printf ("   Testing some dice-rolling in Campus A region 1...\n");
+   	throwDice (g, 11);
+   	player = getWhoseTurn (g);
+    stuTypes[player][STUDENT_MTV] += 1;
+
+    index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Campus A region 1 is set correctly.\n");
+
+   	printf ("   Testing some dice-rolling in Campus B region 1...\n");
+   	throwDice (g, 9);
+   	player = getWhoseTurn (g);
+    stuTypes[player][STUDENT_BQN] += 1;
+
+    index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Campus B region 1 is set correctly.\n");
+
+   	printf ("   Testing some dice-rolling in Campus C regions...\n");
+   	throwDice (g, 8);
+   	player = getWhoseTurn (g);
+    stuTypes[player][STUDENT_MTV] += 1;
+    stuTypes[player][STUDENT_MJ] += 1;
+
+    index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Campus C regions are set correctly.\n");
+
+   	printf ("   Testing some dice-rolling in Campus A region 2...\n");
+   	throwDice (g, 6);
+   	player = getWhoseTurn (g);
+    stuTypes[player][STUDENT_MJ] += 1;
+
+    index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Campus A regions are all vset correctly.\n");
+
+   	printf ("   Testing some dice-rolling in Campus B region 2...\n");
+   	throwDice (g, 5);
+   	player = getWhoseTurn (g);
+    stuTypes[player][STUDENT_BPS] += 1;
+
+    index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Campus B regions are all set correctly.\n");
+   	printf ("  Set 1 of tests all passed!\n");
+
+   	printf ("  Test 2: Retraining Students.\n");
    
    action a1, a2, b1, b2, c1, c2;
-   
    a1.actionCode  = RETRAIN_STUDENTS;
    a1.disciplineFrom = STUDENT_MTV;
    a1.disciplineTo = STUDENT_THD;
@@ -1190,119 +1192,87 @@ void testgetStudents (void) {
    c2.disciplineFrom = STUDENT_BPS;
    c2.disciplineTo =  STUDENT_MTV;
 
-   index = 0;
-   
-   while (index < 4) {
-   
-      assert (getStudents (g, UNI_A, STUDENT_THD) == index);
-      assert (getStudents (g, UNI_A, STUDENT_BPS) == 3);
-      assert (getStudents (g, UNI_A, STUDENT_BQN) == 3);
-      assert (getStudents (g, UNI_A, STUDENT_MJ) == indexA2 + 1);
-      assert (getStudents (g, UNI_A, STUDENT_MTV) == indexA1 + 1);
-      assert (getStudents (g, UNI_A, STUDENT_MMONEY) == index + 1);
-   
-      assert (getStudents (g, UNI_B, STUDENT_THD) == 0);
-      assert (getStudents (g, UNI_B, STUDENT_BPS) == indexB2 + 3);
-      assert (getStudents (g, UNI_B, STUDENT_BQN) == indexB1 + 3);
-      assert (getStudents (g, UNI_B, STUDENT_MJ) == index + 1);
-      assert (getStudents (g, UNI_B, STUDENT_MTV) == index + 1);
-      assert (getStudents (g, UNI_B, STUDENT_MMONEY) == 1);
-   
-      assert (getStudents (g, UNI_C, STUDENT_THD) == 0);
-      assert (getStudents (g, UNI_C, STUDENT_BPS) == index + 3);
-      assert (getStudents (g, UNI_C, STUDENT_BQN) == index + 3);
-      assert (getStudents (g, UNI_C, STUDENT_MJ) == indexC1 + 1);
-      assert (getStudents (g, UNI_C, STUDENT_MTV) == indexC2 + 1);
-      assert (getStudents (g, UNI_C, STUDENT_MMONEY) == 1);
-   
-      throwDice (g, 4);
-      makeAction (g, a1);
-      makeAction (g, a2);
-      indexA1 -= 3;
-      indexA2 -= 3;
-      index ++;
-   
-      assert (getStudents (g, UNI_A, STUDENT_THD) == index);
-      assert (getStudents (g, UNI_A, STUDENT_BPS) == 3);
-      assert (getStudents (g, UNI_A, STUDENT_BQN) == 3);
-      assert (getStudents (g, UNI_A, STUDENT_MJ) == indexA2 + 1);
-      assert (getStudents (g, UNI_A, STUDENT_MTV) == indexA1 + 1);
-      assert (getStudents (g, UNI_A, STUDENT_MMONEY) == index + 1);
-   
-      throwDice (g, 4);
-      makeAction (g, b1);
-      makeAction (g, b2);
-      indexB1 -= 3;
-      indexB2 -= 3;
-   
-      assert (getStudents (g, UNI_B, STUDENT_THD) == 0);
-      assert (getStudents (g, UNI_B, STUDENT_BPS) == indexB2 + 3);
-      assert (getStudents (g, UNI_B, STUDENT_BQN) == indexB1 + 3);
-      assert (getStudents (g, UNI_B, STUDENT_MJ) == index + 1);
-      assert (getStudents (g, UNI_B, STUDENT_MTV) == index + 1);
-      assert (getStudents (g, UNI_B, STUDENT_MMONEY) == 1);
-   
-      throwDice (g, 4);
-      makeAction (g, c1);
-      makeAction (g, c2);
-      indexB1 -= 3;
-      indexB2 -= 3;
-       
-      assert (getStudents (g, UNI_C, STUDENT_THD) == 0);
-      assert (getStudents (g, UNI_C, STUDENT_BPS) == index + 3);
-      assert (getStudents (g, UNI_C, STUDENT_BQN) == index + 3);
-      assert (getStudents (g, UNI_C, STUDENT_MJ) == indexC1 + 1);
-      assert (getStudents (g, UNI_C, STUDENT_MTV) == indexC2 + 1);
-      assert (getStudents (g, UNI_C, STUDENT_MMONEY) == 1);
+   printf ("   Some retraining moves for Player A...\n");
+    throwDice (g, 4);
+    throwDice (g, 4); //Simply to make it to player A's turn.
+    player = getWhoseTurn (g);
+    makeAction (g, a1);
+   	makeAction (g, a2);
+   	stuTypes [player][STUDENT_MTV] -= 3;
+   	stuTypes [player][STUDENT_THD] += 1;
+   	stuTypes [player][STUDENT_MJ] -= 3;
+   	stuTypes [player][STUDENT_MMONEY] += 1;
 
-      index ++;         
-   }
-   printf ("Testing that when a 7 is rolled, MMONEY and MTV \
-            change into THD\n");
-   assert (getStudents (g, UNI_A, STUDENT_THD) == index);
-   assert (getStudents (g, UNI_A, STUDENT_BPS) == 3);
-   assert (getStudents (g, UNI_A, STUDENT_BQN) == 3);
-   assert (getStudents (g, UNI_A, STUDENT_MJ) == indexA2 + 1);
-   assert (getStudents (g, UNI_A, STUDENT_MTV) == indexA1 + 1);
-   assert (getStudents (g, UNI_A, STUDENT_MMONEY) == index + 1);
+   	index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Player A retraining is successful.\n");
 
-   assert (getStudents (g, UNI_B, STUDENT_THD) == 0);
-   assert (getStudents (g, UNI_B, STUDENT_BPS) == indexB2 + 3);
-   assert (getStudents (g, UNI_B, STUDENT_BQN) == indexB1 + 3);
-   assert (getStudents (g, UNI_B, STUDENT_MJ) == index + 1);
-   assert (getStudents (g, UNI_B, STUDENT_MTV) == index + 1);
-   assert (getStudents (g, UNI_B, STUDENT_MMONEY) == 1);   
 
-   assert (getStudents (g, UNI_C, STUDENT_THD) == 0);
-   assert (getStudents (g, UNI_C, STUDENT_BPS) == index + 3);
-   assert (getStudents (g, UNI_C, STUDENT_BQN) == index + 3);
-   assert (getStudents (g, UNI_C, STUDENT_MJ) == indexC1 + 1);
-   assert (getStudents (g, UNI_C, STUDENT_MTV) == indexC2 + 1);
-   assert (getStudents (g, UNI_C, STUDENT_MMONEY) == 1);
-   
+   	printf ("   Some retraining moves for Player B...\n");
+    throwDice (g, 4);
+    makeAction (g, b1);
+    makeAction (g, b2);
+	player = getWhoseTurn (g);
+   	stuTypes [player][STUDENT_BQN] -= 3;
+   	stuTypes [player][STUDENT_MJ] += 1;
+   	stuTypes [player][STUDENT_BPS] -= 3;
+   	stuTypes [player][STUDENT_MTV] += 1;
+
+   	index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Player B retraining is successful.\n");
+
+   	printf ("   Some retraining moves for Player C...\n");
+   	throwDice (g, 4);
+    makeAction (g, c1);
+    makeAction (g, c2);
+	player = getWhoseTurn (g);
+   	stuTypes [player][STUDENT_MJ] -= 3;
+   	stuTypes [player][STUDENT_BPS] += 1;
+   	stuTypes [player][STUDENT_BPS] -= 3;
+   	stuTypes [player][STUDENT_MTV] += 1;
+
+   	index = 0;
+   	while (index < 6) {
+   		assert (getStudents (g, player, index) == stuTypes[player][index]);
+   		index ++;
+   	}
+   	printf ("   Player C retraining is successful.\n");
+   	printf ("  Set 2 of tests all passed!\n");
+
+   printf ("Test 3: Dice 7 is rolled, MMONEY and MTV change into THDs!\n");
    throwDice (g, 7);
-   
-   assert (getStudents (g, UNI_A, STUDENT_THD) == index + index + 2);
-   assert (getStudents (g, UNI_A, STUDENT_BPS) == 3);
-   assert (getStudents (g, UNI_A, STUDENT_BQN) == 3);
-   assert (getStudents (g, UNI_A, STUDENT_MJ) == indexA2 + 1);
-   assert (getStudents (g, UNI_A, STUDENT_MTV) == indexA1);
-   assert (getStudents (g, UNI_A, STUDENT_MMONEY) == 0);
+   stuTypes[UNI_A][STUDENT_THD] += \
+   				(stuTypes[UNI_A][STUDENT_MTV] + stuTypes[UNI_A][STUDENT_MMONEY]);
+   stuTypes[UNI_B][STUDENT_THD] += \
+   				(stuTypes[UNI_B][STUDENT_MTV] + stuTypes[UNI_B][STUDENT_MMONEY]);
+   stuTypes[UNI_C][STUDENT_THD] += \
+   				(stuTypes[UNI_C][STUDENT_MTV] + stuTypes[UNI_C][STUDENT_MMONEY]);
 
-   assert (getStudents (g, UNI_B, STUDENT_THD) == index + 2);
-   assert (getStudents (g, UNI_B, STUDENT_BPS) == indexB2 + 3);
-   assert (getStudents (g, UNI_B, STUDENT_BQN) == indexB1 + 3);
-   assert (getStudents (g, UNI_B, STUDENT_MJ) == index + 1);
-   assert (getStudents (g, UNI_B, STUDENT_MTV) == index);
-   assert (getStudents (g, UNI_B, STUDENT_MMONEY) == 0);
-   
-   assert (getStudents (g, UNI_C, STUDENT_THD) == indexC2 + 2);
-   assert (getStudents (g, UNI_C, STUDENT_BPS) == index + 3);
-   assert (getStudents (g, UNI_C, STUDENT_BQN) == index + 3);
-   assert (getStudents (g, UNI_C, STUDENT_MJ) == indexC1 + 1);
-   assert (getStudents (g, UNI_C, STUDENT_MTV) == 0);
-   assert (getStudents (g, UNI_C, STUDENT_MMONEY) == 0);   
-   printf ("all tests passed\n");
+   	stuTypes[UNI_A][STUDENT_MTV] = 0;
+   	stuTypes[UNI_B][STUDENT_MTV] = 0;
+   	stuTypes[UNI_C][STUDENT_MTV] = 0;
+   	stuTypes[UNI_A][STUDENT_MMONEY] = 0;
+   	stuTypes[UNI_B][STUDENT_MMONEY] = 0;
+   	stuTypes[UNI_C][STUDENT_MMONEY] = 0;
+
+   	player = UNI_A;
+   	while (player < 4){
+   		while (index < 6) {
+   			assert (getStudents (g, player, index) == stuTypes[player][index]);
+   			index ++;
+   		}
+   		player ++;
+   	}
+   	printf ("  Set 3 of tests all passed!\n");
+
+   printf ("All tests for getStudents() passed!\n\n");
 }
 
 void testgetExchangeRate (void) {
