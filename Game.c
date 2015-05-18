@@ -183,42 +183,45 @@ void initializeBoard (Game g) {
 
 	//For player 1 UNI_A
 	g->gameBoard.campus[2][5][0] = UNI_A;
+	g->gameBoard.campus[4][1][6] = UNI_A;
+	g->gameBoard.campus[1][6][4] = UNI_B;
+	g->gameBoard.campus[5][0][2] = UNI_B;
+	g->gameBoard.campus[0][2][5] = UNI_C;
+	char *path = malloc (10);
+	path = "LRLRL";
+	makeCampus (g, path, UNI_C);
+
+	/*
 	char * path;
 	path = "L";
 	makeArc (g, path, UNI_A);
 	path = "R";
 	makeArc (g, path, UNI_A);
-	g->gameBoard.campus[4][1][6] = UNI_A;
 	g->gameBoard.arc[4][1][6][3][0][4] = UNI_A;
 	g->gameBoard.arc[3][0][4][4][1][6] = UNI_A;
 	g->gameBoard.arc[4][1][6][2][0][5] = UNI_A;
 	g->gameBoard.arc[2][0][5][4][1][6] = UNI_A;
 
 	//For player 2 UNI_B
-	g->gameBoard.campus[1][6][4] = UNI_B;
 	g->gameBoard.arc[1][6][4][0][4][3] = UNI_B;
 	g->gameBoard.arc[0][4][3][1][6][4] = UNI_B;
 	g->gameBoard.arc[1][6][4][0][5][2] = UNI_B;
 	g->gameBoard.arc[0][5][2][1][6][4] = UNI_B;
-	g->gameBoard.campus[5][0][2] = UNI_B;
 	g->gameBoard.arc[5][0][2][6][2][3] = UNI_B;
 	g->gameBoard.arc[6][2][3][5][0][2] = UNI_B;
 	g->gameBoard.arc[5][0][2][6][1][4] = UNI_B;
 	g->gameBoard.arc[6][1][4][5][0][2] = UNI_B;
 
-	//For player 3 UNI_C
-	path = "LRLRL";
-	makeCampus (g, path, UNI_C);
+
 	g->gameBoard.arc[6][4][1][4][3][0] = UNI_C;
-	g->gameBoard.arc[4][3][0][6][4][1] = UNI_C;;
-	g->gameBoard.arc[6][4][1][5][2][0] = UNI_C;;
-	g->gameBoard.arc[5][2][0][6][4][1] = UNI_C;;
-	g->gameBoard.campus[0][2][5] = UNI_C;
+	g->gameBoard.arc[4][3][0][6][4][1] = UNI_C;
+	g->gameBoard.arc[6][4][1][5][2][0] = UNI_C;
+	g->gameBoard.arc[5][2][0][6][4][1] = UNI_C;	
 	g->gameBoard.arc[0][2][5][2][3][6] = UNI_C;
 	g->gameBoard.arc[2][3][6][0][2][5] = UNI_C;
 	g->gameBoard.arc[0][2][5][1][4][6] = UNI_C;
 	g->gameBoard.arc[1][4][6][0][2][5] = UNI_C;
-
+	*/
 }
 
 
