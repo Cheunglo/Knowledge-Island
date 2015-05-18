@@ -1025,10 +1025,9 @@ void testgetIPs (void) {
 }
 
 void testgetPublications (void) {
-   printf ("Testing getPublications\n");
+   printf ("\nTesting getPublications\n");
    printf ("It returns no. Publications a player has.\n");
    printf ("First set of tests:\n");
-   printf ("Each player getting a Publication every turn");
 
    int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
@@ -1041,58 +1040,34 @@ void testgetPublications (void) {
    //action {actionCode, destination, disciplineFrom, disciplineTo}
    //only the actionCode is needed for this test
    //the other components are just random
-   action a = {OBTAIN_PUBLICATION, "L", 3, 1};
-   int index = 0;
-   assert (getPublications (g, UNI_A) == 0);
-   assert (getPublications (g, UNI_B) == 0);
-   assert (getPublications (g, UNI_C) == 0);
-   while (index < 10) {
-         throwDice (g, 7);
-         makeAction (g, a);
-         assert (getPublications (g, UNI_A) == index);
-         throwDice (g, 7);
-         makeAction (g, a);
-         assert (getPublications (g, UNI_B) == index);
-         throwDice (g, 7);
-         makeAction (g, a);
-         assert (getPublications (g, UNI_C) == index);
-      index ++;
+   action a;
+   a.actionCode = OBTAIN_PUBLICATION;
+   int player = UNI_A;
+
+   printf ("   Testing initial conditions...\n");
+   while (player < 4) {
+   		assert (getPublications (g, player) == 0);
+   		player ++;
    }
-   printf ("Set 1 of tests passed\n Starting second set of tests\n");
-   printf ("Getting Publications.\n");
-   printf ("PlayerA every turn, playerB every second and \
-            playerC every third.\n");
+   printf ("   Initial publication settings correct.\n");
 
-   g = newGame (disciplines, dice);
-   a.actionCode = PASS;
-   action b = {OBTAIN_PUBLICATION, "L", 3, 1};
-   int indexA = 0;
-   int indexB = 0;
-   int indexC = 0;
+   printf ("   Testing obtaining publications...\n");
+   throwDice (g, 5);
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getPublications (g, player) == 1);
 
-      while (indexC < 10) {
-         throwDice (g, 7);
-         makeAction (g, b);
-         indexA ++;
-         assert (getPublications (g, UNI_A) == indexA);
-         throwDice (g, 7);
-         if ((indexB % 2) == 0) {
-            makeAction (g, b);
-            indexB ++;
-        } else {
-            makeAction (g, a);
-        }
-         assert (getPublications (g, UNI_B) == indexB);
-         throwDice (g, 7);
-         if ((indexC % 3) == 0) {
-            makeAction (g, b);
-            indexC ++;
-         } else {
-            makeAction (g, a);
-         }
-         assert (getPublications (g, UNI_C) == indexC);
-        }
-   printf ("all tests passed\n");
+   throwDice (g, 5);
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getPublications (g, player) == 1);
+
+   throwDice (g, 5);
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getPublications (g, player) == 1);
+
+   printf ("All tests for getPublications() successful.\n\n");
 }
 
 void testgetStudents (void) {
