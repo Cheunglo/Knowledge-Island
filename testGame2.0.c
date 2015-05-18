@@ -920,76 +920,37 @@ void testGetGO8s (void) {
 	printf ("...All tests for getG08s() passed.\n");
 }
 
-void testgetCampuses (void) {
-   printf ("Testing getCampuses\n");
-   printf ("It returns no. normal campuses a player has.\n");
-   printf ("First set of tests:\n");
-   printf ("Each player building a campus every turn");
+void testGetCampuses (void) {
+	//test if it returns number of G08 campuses of specified player
+	printf ("\nTesting getCampuses()...\n");
 
-   int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
+	int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
                 STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
                 STUDENT_MJ, STUDENT_BQN, STUDENT_THD, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
 	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
 
-   Game g = newGame (disciplines, dice);
-   //action {actionCode, destination, disciplineFrom, disciplineTo}
-   //only the actionCode is needed for this test
-   //the other components are just random
-   action a = {BUILD_CAMPUS, "L", 3, 1};
-   int index = 0;
-   assert (getCampuses (g, UNI_A) == 2);
-   assert (getCampuses (g, UNI_B) == 2);
-   assert (getCampuses (g, UNI_C) == 2);
-   while (index < 10) {
-         throwDice (g, 7);
-         makeAction (g, a);
-         assert (getCampuses (g, UNI_A) == index + 2);
-         throwDice (g, 7);
-         makeAction (g, a);
-         assert (getCampuses (g, UNI_B) == index + 2);
-         throwDice (g, 7);
-         makeAction (g, a);
-         assert (getCampuses (g, UNI_C) == index + 2);
-      index ++;
-   }
-   printf ("Set 1 of tests passed\n Starting second set of tests\n");
-   printf ("Building campuses.\n");
-   printf ("PlayerA every turn, playerB every second and \
-            playerC every third.\n");
+	Game g = newGame (disciplines, dice);
+	action a;
+	int player = UNI_A;
+	int numCmps[4] = {0, 2, 2, 2};
 
-   g = newGame (disciplines, dice);
-   a.actionCode = PASS; 
-   action b = {BUILD_CAMPUS, "L", 3, 1};
-   int indexA = 0;
-   int indexB = 0;
-   int indexC = 0;
+	//Tests all new games start with 0, inlcuding NO_ONE
+	while (player < 4) {
+		assert (getCampuses (g, player) == 2);
+		player ++;
+	}
 
-      while (indexC < 10) {
-         throwDice (g, 7);
-         makeAction (g, b);
-         indexA ++;
-         assert (getCampuses (g, UNI_A) == indexA + 2);
-         throwDice (g, 7);
-         if ((indexB % 2) == 0) {
-            makeAction (g, b);
-            indexB ++;
-        } else {
-            makeAction (g, a);
-        }
-         assert (getCampuses (g, UNI_B) == indexB + 2);
-         throwDice (g, 7);
-         if ((indexC % 3) == 0) {
-            makeAction (g, b);
-            indexC ++;
-         } else {
-            makeAction (g, a);
-         }
-         assert (getCampuses (g, UNI_C) == indexC + 2) ;
-        }
-   printf ("all tests passed\n");
+	//Tests that players will get G08 after making move
+	player = getWhoseTurn (g);
+	a.actionCode = BUILD_CAMPUS;
+	makeAction (g, a);
+	numCmps[player] ++;
+	assert (getCampuses (g, player) == numCmps[player]);
 
+	disposeGame(g);
+	printf ("...All tests for getCampuses() passed.\n\n");
 }
 
 void testgetIPs (void) {
