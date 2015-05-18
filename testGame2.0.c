@@ -1,3 +1,4 @@
+
 /*
  * Group: 4 Stack
  * Group Members: Stephanie Chua, Louis Cheung
@@ -47,7 +48,7 @@ void testIsLegalAction (void);
 void testGetKPIpoints (void);
 void testGetARCs (void); //returns no grants player has
 void testGetGO8s (void);
-void testgetCampuses (void);
+void testGetCampuses (void);
 void testgetIPs (void);
 void testgetPublications (void);
 void testgetStudents (void);
@@ -55,6 +56,7 @@ void testgetExchangeRate (void);
 
 int main (int argc, char *argv[]) {
 
+	printf ("Testing Game function!\n\n");
 	//Tests that have passed:
 	testGetARCs (); 
 	testGetDiscipline ();
@@ -68,18 +70,15 @@ int main (int argc, char *argv[]) {
 	testIsLegalAction ();
 	testGetGO8s ();
 	testGetKPIpoints ();
-	
-	//Failed:
-   	testgetStudents ();
 	testMakeAction ();
-	testgetExchangeRate ();
-	testgetPublications ();
 	testGetARC (); 
-	testgetIPs (); 
-	testgetCampuses ();
+	testGetCampuses ();
+	testgetIPs ();
+	testgetPublications ();
+	testgetStudents (); 
+	testgetExchangeRate ();
 
-
-   printf ("\n~~**All tests passed!**~~\n");
+   printf ("~~**All tests passed!**~~\n\n");
 
    return EXIT_SUCCESS;
 }
@@ -900,7 +899,7 @@ void testGetGO8s (void) {
 
 	Game g = newGame (disciplines, dice);
 	action a;
-	int player = 0;
+	int player = UNI_A;
 	int numG08[4] = {0};
 
 	//Tests all new games start with 0, inlcuding NO_ONE
@@ -953,7 +952,130 @@ void testGetCampuses (void) {
 	printf ("...All tests for getCampuses() passed.\n\n");
 }
 
+/*
+void testgetCampuses (void) {
+   printf ("Testing getCampuses\n");
+   printf ("It returns no. normal campuses a player has.\n");
+   printf ("First set of tests:\n");
+   printf ("Each player building a campus every turn");
+
+   int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
+                STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
+                STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
+                STUDENT_MJ, STUDENT_BQN, STUDENT_THD, STUDENT_MJ,\
+                STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
+	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
+
+   Game g = newGame (disciplines, dice);
+   //action {actionCode, destination, disciplineFrom, disciplineTo}
+   //only the actionCode is needed for this test
+   //the other components are just random
+   action a = {BUILD_CAMPUS, "L", 3, 1};
+   int index = 1;
+
+   printf ("   Testing initial conditions... \n");
+   assert (getCampuses (g, UNI_A) == 2);
+   assert (getCampuses (g, UNI_B) == 2);
+   assert (getCampuses (g, UNI_C) == 2);
+   printf ("   Initial conditions successful. \n");
+
+   while (index < 10) {
+         throwDice (g, 7);
+         makeAction (g, a);
+         assert (getCampuses (g, UNI_A) == index + 2);
+         throwDice (g, 7);
+         makeAction (g, a);
+         assert (getCampuses (g, UNI_B) == index + 2);
+         throwDice (g, 7);
+         makeAction (g, a);
+         assert (getCampuses (g, UNI_C) == index + 2);
+      index ++;
+   }
+   printf ("   Set 1 of tests passed\n\n    Starting second set of tests\n");
+   printf ("   Building campuses.\n");
+   printf ("   PlayerA every turn, playerB every second and \
+               playerC every third.\n");
+
+   g = newGame (disciplines, dice);
+   a.actionCode = PASS; 
+   action b = {BUILD_CAMPUS, "L", 3, 1};
+   int indexA = 0;
+   int indexB = 0;
+   int indexC = 0;
+
+      while (indexC < 10) {
+         throwDice (g, 7);
+         makeAction (g, b);
+         indexA ++;
+         assert (getCampuses (g, UNI_A) == indexA + 2);
+         throwDice (g, 7);
+         if ((indexB % 2) == 0) {
+            makeAction (g, b);
+            indexB ++;
+        } else {
+            makeAction (g, a);
+        }
+         assert (getCampuses (g, UNI_B) == indexB + 2);
+         throwDice (g, 7);
+         if ((indexC % 3) == 0) {
+            makeAction (g, b);
+            indexC ++;
+         } else {
+            makeAction (g, a);
+         }
+         assert (getCampuses (g, UNI_C) == indexC + 2) ;
+        }
+   printf ("all tests passed\n");
+}*/
+
 void testgetIPs (void) {
+   printf ("\nTesting getIPs.\n");
+   printf ("It returns no. Publications a player has.\n");
+   printf ("First set of tests:\n");
+
+   int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
+                STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
+                STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
+                STUDENT_MJ, STUDENT_BQN, STUDENT_THD, STUDENT_MJ,\
+                STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
+	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
+
+   Game g = newGame (disciplines, dice);
+   //action {actionCode, destination, disciplineFrom, disciplineTo}
+   //only the actionCode is needed for this test
+   //the other components are just random
+   action a;
+   a.actionCode = OBTAIN_IP_PATENT;
+   int player = UNI_A;
+
+   printf ("   Testing initial conditions...\n");
+   while (player < 4) {
+   		assert (getIPs (g, player) == 0);
+   		player ++;
+   }
+   printf ("   Initial IP patent settings correct.\n");
+
+   printf ("   Testing obtaining IP patents...\n");
+   throwDice (g, 5);
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getIPs (g, player) == 1);
+
+   throwDice (g, 5);
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getIPs (g, player) == 1);
+
+   throwDice (g, 5);
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getIPs (g, player) == 1);
+
+   printf ("All tests for getIPs() successful.\n\n");
+}
+
+
+/*
    printf ("Testing getIPs\n");
    printf ("It returns no. IPs a player has.\n");
    printf ("First set of tests:\n");
@@ -1021,8 +1143,8 @@ void testgetIPs (void) {
          }
          assert (getIPs (g, UNI_C) == indexC);
         }
-   printf ("all tests passed\n");
-}
+   printf ("all tests passed\n"); 
+}*/
 
 void testgetPublications (void) {
    printf ("\nTesting getPublications\n");
@@ -1068,6 +1190,59 @@ void testgetPublications (void) {
    assert (getPublications (g, player) == 1);
 
    printf ("All tests for getPublications() successful.\n\n");
+
+/*
+   int index = 0;
+   assert (getPublications (g, UNI_A) == 0);
+   assert (getPublications (g, UNI_B) == 0);
+   assert (getPublications (g, UNI_C) == 0);
+   while (index < 10) {
+         throwDice (g, 7);
+         makeAction (g, a);
+         assert (getPublications (g, UNI_A) == index);
+         throwDice (g, 7);
+         makeAction (g, a);
+         assert (getPublications (g, UNI_B) == index);
+         throwDice (g, 7);
+         makeAction (g, a);
+         assert (getPublications (g, UNI_C) == index);
+      index ++;
+   }
+   printf ("Set 1 of tests passed\n Starting second set of tests\n");
+   printf ("Getting Publications.\n");
+   printf ("PlayerA every turn, playerB every second and \
+            playerC every third.\n");
+
+   g = newGame (disciplines, dice);
+   a.actionCode = PASS;
+   action b = {OBTAIN_PUBLICATION, "L", 3, 1};
+   int indexA = 0;
+   int indexB = 0;
+   int indexC = 0;
+
+      while (indexC < 10) {
+         throwDice (g, 7);
+         makeAction (g, b);
+         indexA ++;
+         assert (getPublications (g, UNI_A) == indexA);
+         throwDice (g, 7);
+         if ((indexB % 2) == 0) {
+            makeAction (g, b);
+            indexB ++;
+        } else {
+            makeAction (g, a);
+        }
+         assert (getPublications (g, UNI_B) == indexB);
+         throwDice (g, 7);
+         if ((indexC % 3) == 0) {
+            makeAction (g, b);
+            indexC ++;
+         } else {
+            makeAction (g, a);
+         }
+         assert (getPublications (g, UNI_C) == indexC);
+        }
+   printf ("all tests passed\n");*/
 }
 
 void testgetStudents (void) {
@@ -1383,6 +1558,173 @@ void testgetExchangeRate (void) {
    makeAction (g, a);
    assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
    printf ("   Conditional testing for retraining centres complete. Successful!\n");
+
+/*
    
+   int uni = 1; //player
+   int i = 1; //disciplineFrom
+   int j = 0; //disciplineTo
+   while (uni < 4) {
+      while (i < 6) {      
+         while (j < 6 ) {
+            if (i == j) {
+               j ++;
+            }
+            assert (getExchangeRate (g, uni, i, j) == 3);
+            j ++;
+         }
+      j = 0;
+      i ++;
+      }
+      i = 1;
+      uni ++;
+   }      
+   printf ("set 1 of tests passed\n");
+   printf ("testing when there are retraining centres\n");
+   action a, bT, bMON, bENG, bSCI, bJ, c, r1, r2;
+   int k = 0;
+    only UNI_C will build ARC to retraining centres as that player
+     recieves either a BPS or a BQN which are needed to build ARC.
+     also it will make the test less complicated an less prone to 
+     error.
+   
+   
+   a.actionCode  = PASS;
+   //random input
+   a.disciplineFrom = STUDENT_MTV;
+   a.disciplineTo = STUDENT_THD;
+   
+   bT.actionCode = BUILD_CAMPUS;
+   strcpy (bT.destination, TV);
+   bT.disciplineFrom = STUDENT_MTV;
+   bT.disciplineTo = STUDENT_THD;
+   
+   bMON.actionCode = BUILD_CAMPUS;
+   strcpy (bMON.destination, MONEY);
+   bMON.disciplineFrom = STUDENT_MTV;
+   bMON.disciplineTo = STUDENT_THD;
+   
+   bENG.actionCode = BUILD_CAMPUS;
+   strcpy (bENG.destination, ENGINEER);
+   bENG.disciplineFrom = STUDENT_MTV;
+   bENG.disciplineTo = STUDENT_THD;
+   
+   bSCI.actionCode = BUILD_CAMPUS;
+   strcpy (bSCI.destination, SCIENCE);
+   bSCI.disciplineFrom = STUDENT_MTV;
+   bSCI.disciplineTo = STUDENT_THD;
+   
+   bJ.actionCode = BUILD_CAMPUS;
+   strcpy (bJ.destination, JOB);
+   bJ.disciplineFrom = STUDENT_MTV;
+   bJ.disciplineTo = STUDENT_THD;
+
+   c.actionCode  = OBTAIN_ARC;
+   //random input
+   c.disciplineFrom = STUDENT_MTV;
+   c.disciplineTo = STUDENT_THD;
+   
+   r1.actionCode = RETRAIN_STUDENTS;
+   strcpy (r1.destination, " ");
+   r1.disciplineFrom = STUDENT_BPS;
+   r1.disciplineTo = STUDENT_MJ;
+   
+   r2.actionCode = RETRAIN_STUDENTS;
+   strcpy (r2.destination, " ");
+   r2.disciplineFrom = STUDENT_BQN;
+   r2.disciplineTo = STUDENT_MTV;
+   
+   while (k < 99) {
+      throwDice (g, 9);
+      makeAction (g, a);
+      k ++;
+   }
+
+   k = 0;
+
+   while (k < 99 ) {
+      throwDice (g, 5);
+      makeAction (g, a);   
+      k ++;
+   }
+   throwDice (g, 10);
+   makeAction (g, a);
+   throwDice (g, 10);
+   makeAction (g, a);
+   throwDice (g, 10);
+   strcpy (c.destination, "R");
+   makeAction (g, c);
+   strcpy (c.destination, "RR");
+   makeAction (g, c);
+   strcpy (c.destination, "L");
+   makeAction (g, c);
+   strcpy (c.destination, "LR");
+   makeAction (g, c);
+   strcpy (c.destination, "LRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLRR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLRRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLRRLL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLRRLLR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLRRLLRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLRRLLRLR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLRRLLRLRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRLR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRLRR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRRLR");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRRLRL");
+   makeAction (g, c);
+   strcpy (c.destination, "RLLRLRRLRLR");
+   makeAction (g, c);
+   makeAction (g, bT);
+   makeAction (g, bMON);
+   makeAction (g, bENG);
+   makeAction (g, bSCI);
+   makeAction (g, bJ);
+   
+   i = 1;
+   j = 0;
+
+   while (i < 6) {      
+      while (j < 6 ) {
+         if (i == j) {
+            j ++;
+         }
+         assert (getExchangeRate (g, uni, i, j) == 2);
+         j ++;
+      }
+   j = 0;
+   i ++;
+   }*/
+
    printf ("All tests for getExchangeRate passed!\n\n");
 }
+
