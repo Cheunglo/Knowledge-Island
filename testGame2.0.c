@@ -1277,6 +1277,7 @@ void testgetStudents (void) {
 
 void testgetExchangeRate (void) {
 
+	printf("Testing getExchangeRate.\n");
 	int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
                 STUDENT_MTV, STUDENT_BPS,STUDENT_MTV, STUDENT_BQN,\
@@ -1284,172 +1285,104 @@ void testgetExchangeRate (void) {
                 STUDENT_MMONEY, STUDENT_MTV, STUDENT_BQN, STUDENT_BPS };
 	int dice[19] = {9,10,8,12,6,5,3,11,3,11,4,6,4,7,9,2,8,10,5};
 
-
    Game g = newGame (disciplines, dice);
-   printf("Testing getExchangeRate.\n");
-   int uni = 1; //player
-   int i = 1; //disciplineFrom
-   int j = 0; //disciplineTo
-   while (uni < 4) {
-      while (i < 6) {      
-         while (j < 6 ) {
-            if (i == j) {
-               j ++;
-            }
-            assert (getExchangeRate (g, uni, i, j) == 3);
-            j ++;
-         }
-      j = 0;
-      i ++;
-      }
-      i = 1;
-      uni ++;
-   }      
-   printf ("set 1 of tests passed\n");
-   printf ("testing when there are retraining centres\n");
-   action a, bT, bMON, bENG, bSCI, bJ, c, r1, r2;
-   int k = 0;
-   /*only UNI_C will build ARC to retraining centres as that player
-     recieves either a BPS or a BQN which are needed to build ARC.
-     also it will make the test less complicated an less prone to 
-     error.
-   */
-   
-   a.actionCode  = PASS;
-   //random input
+   int player = UNI_A;
+   int stuFrom = 0;
+   int stuTo = 0;
+
+   printf ("   Testing initial conditions...\n");
+   while (player < 4) {
+   	while (stuTo < 6) {
+   		stuFrom = 0;
+   		while (stuFrom < 6) {
+   			assert (getExchangeRate (g, player, stuFrom, stuTo) == 3);
+   			stuFrom ++;
+   		}
+   		stuTo ++;
+   	}
+   	player ++;
+   }
+   printf ("   Initial conditions testing complete. Successful.\n");
+
+   printf ("   Conditional testing for retraining centres initialized...\n");
+   //Firstly building a campus at the retraining centre without isLegal
+   action a;
+   a.actionCode = BUILD_CAMPUS;
+   strcpy (a.destination, "R"); //which is an MTV retraining centre
    a.disciplineFrom = STUDENT_MTV;
-   a.disciplineTo = STUDENT_THD;
-   
-   bT.actionCode = BUILD_CAMPUS;
-   strcpy (bT.destination, TV);
-   bT.disciplineFrom = STUDENT_MTV;
-   bT.disciplineTo = STUDENT_THD;
-   
-   bMON.actionCode = BUILD_CAMPUS;
-   strcpy (bMON.destination, MONEY);
-   bMON.disciplineFrom = STUDENT_MTV;
-   bMON.disciplineTo = STUDENT_THD;
-   
-   bENG.actionCode = BUILD_CAMPUS;
-   strcpy (bENG.destination, ENGINEER);
-   bENG.disciplineFrom = STUDENT_MTV;
-   bENG.disciplineTo = STUDENT_THD;
-   
-   bSCI.actionCode = BUILD_CAMPUS;
-   strcpy (bSCI.destination, SCIENCE);
-   bSCI.disciplineFrom = STUDENT_MTV;
-   bSCI.disciplineTo = STUDENT_THD;
-   
-   bJ.actionCode = BUILD_CAMPUS;
-   strcpy (bJ.destination, JOB);
-   bJ.disciplineFrom = STUDENT_MTV;
-   bJ.disciplineTo = STUDENT_THD;
+   a.disciplineTo = STUDENT_BQN;
 
-   c.actionCode  = OBTAIN_ARC;
-   //random input
-   c.disciplineFrom = STUDENT_MTV;
-   c.disciplineTo = STUDENT_THD;
-   
-   r1.actionCode = RETRAIN_STUDENTS;
-   strcpy (r1.destination, " ");
-   r1.disciplineFrom = STUDENT_BPS;
-   r1.disciplineTo = STUDENT_MJ;
-   
-   r2.actionCode = RETRAIN_STUDENTS;
-   strcpy (r2.destination, " ");
-   r2.disciplineFrom = STUDENT_BQN;
-   r2.disciplineTo = STUDENT_MTV;
-   
-   while (k < 99) {
-      throwDice (g, 9);
-      makeAction (g, a);
-      k ++;
-   }
-
-   k = 0;
-
-   while (k < 99 ) {
-      throwDice (g, 5);
-      makeAction (g, a);   
-      k ++;
-   }
-   throwDice (g, 10);
+   throwDice (g, 4); //To start the game, turn = 0;
+   player = getWhoseTurn (g);
    makeAction (g, a);
-   throwDice (g, 10);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+   //Moving on to the other vertex edge
+   strcpy (a.destination, "RR"); //which is an MTV retraining centre
+   throwDice (g, 4); //Next player's turn
+   player = getWhoseTurn (g);
    makeAction (g, a);
-   throwDice (g, 10);
-   strcpy (c.destination, "R");
-   makeAction (g, c);
-   strcpy (c.destination, "RR");
-   makeAction (g, c);
-   strcpy (c.destination, "L");
-   makeAction (g, c);
-   strcpy (c.destination, "LR");
-   makeAction (g, c);
-   strcpy (c.destination, "LRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLRR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLRRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLRRLL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLRRLLR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLRRLLRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLRRLLRLR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLRRLLRLRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRLR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRLRR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRRLR");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRRLRL");
-   makeAction (g, c);
-   strcpy (c.destination, "RLLRLRRLRLR");
-   makeAction (g, c);
-   makeAction (g, bT);
-   makeAction (g, bMON);
-   makeAction (g, bENG);
-   makeAction (g, bSCI);
-   makeAction (g, bJ);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+
+   //For student retraining STUDENT_MMONEY
+   a.disciplineFrom = STUDENT_MMONEY;
+   a.disciplineTo = STUDENT_BQN;
+   strcpy (a.destination, "LR");
+   throwDice (g, 4); 
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+   //Moving on to the other vertex edge
+   strcpy (a.destination, "LRL"); 
+   throwDice (g, 4); //Next player's turn
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+
+   //For student retraining STUDENT_BPS
+   a.disciplineFrom = STUDENT_BPS;
+   a.disciplineTo = STUDENT_BQN;
+   strcpy (a.destination, "RLRRLLRLR");
+   throwDice (g, 4); 
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+   //Moving on to the other vertex edge
+   strcpy (a.destination, "RLRRLLRLRL"); 
+   throwDice (g, 4); //Next player's turn
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+
+   //For student retraining STUDENT_BQN
+   a.disciplineFrom = STUDENT_BQN;
+   a.disciplineTo = STUDENT_BPS;
+   strcpy (a.destination, "RLLRLRLR");
+   throwDice (g, 4); 
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+   //Moving on to the other vertex edge
+   strcpy (a.destination, "RLLRLRLRR"); 
+   throwDice (g, 4); //Next player's turn
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+
+   //For student retraining STUDENT_MJ
+   a.disciplineFrom = STUDENT_MJ;
+   a.disciplineTo = STUDENT_BPS;
+   strcpy (a.destination, "RLLRLRRLRL");
+   throwDice (g, 4); 
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+   //Moving on to the other vertex edge
+   strcpy (a.destination, "RLLRLRRLRLR"); 
+   throwDice (g, 4); //Next player's turn
+   player = getWhoseTurn (g);
+   makeAction (g, a);
+   assert (getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo) == 2);
+   printf ("   Conditional testing for retraining centres complete. Successful!\n");
    
-   i = 1;
-   j = 0;
-
-   while (i < 6) {      
-      while (j < 6 ) {
-         if (i == j) {
-            j ++;
-         }
-         assert (getExchangeRate (g, uni, i, j) == 2);
-         j ++;
-      }
-   j = 0;
-   i ++;
-   }
-
-   printf ("all tests passed\n");
+   printf ("All tests for getExchangeRate passed!\n\n");
 }
