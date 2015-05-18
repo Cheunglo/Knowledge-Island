@@ -542,22 +542,27 @@ void testGetARC (void) {
 	Game g = newGame (disciplines, dice);
 	action a;
 	a.actionCode = 0;
+	strcpy (a.destination, "L");
 	a.disciplineFrom = 0;
 	a.disciplineTo = 0;
-
+	printf ("   Initializing tests complete.\n   Testing vacant ARCs...\n");
 	//Tests that it's vacant at the beginning
-	assert (getARC (g, a.destination) == FALSE);
+	strcpy (a.destination, "L");
+	assert (getARC (g, a.destination) == VACANT_ARC);
 	strcpy (a.destination, "LRLR");
-	assert (getARC (g, a.destination) == FALSE);
+	assert (getARC (g, a.destination) == VACANT_ARC);
+	printf ("   Vacant ARCs testing complete.\n");
 
+	printf ("   Testing ARC building...\n");
 	//Tests that it will return an Arc Code
 	player = getWhoseTurn(g);
 	a.actionCode = OBTAIN_ARC;
-	assert (getARC (g, a.destination) != FALSE);
+	makeAction (g, a);
+	assert (getARC (g, a.destination) != VACANT_ARC);
+	printf ("   ARC building complete.\n");
 
 	disposeGame(g);
 	printf ("... All tests for getARC() passed.\n");
-
 }
 
 void testIsLegalAction (void) {
