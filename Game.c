@@ -687,7 +687,12 @@ int retrainConditions (Game g, action a, int player) {
 	rate = getExchangeRate (g, player, a.disciplineFrom, a.disciplineTo);
 	numStudents = getStudents (g, player, a.disciplineFrom);
 
-	if ((a.disciplineTo >= 0) && (a.disciplineFrom > 0)
+	if (numStudents < rate) {
+		return FALSE;
+	}
+
+	if ((answer == TRUE) && (a.disciplineTo >= 0) 
+		&& (a.disciplineFrom > 0)
 		&& (a.disciplineTo < MAX_STU_TYPES)
 		&& (a.disciplineFrom < MAX_STU_TYPES)
 		&& (numStudents >= rate)) {
@@ -698,6 +703,7 @@ int retrainConditions (Game g, action a, int player) {
 	}
 	
 	return answer;
+	printf ("answer is %d\n", answer);
 }
 
 //Function returns the KPI points of specified player
