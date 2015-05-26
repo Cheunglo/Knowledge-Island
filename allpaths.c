@@ -1,7 +1,7 @@
 //all possible paths of the map
 //by Ruby Yu
 
-path totalpaths[72] = {
+path allPaths[72] = {
 	"L",
 	"R",
 "RR",
