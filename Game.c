@@ -815,10 +815,10 @@ int getTurnNumber (Game g){
 // return the player id of the player whose turn it is 
 // the result of this function is NO_ONE during Terra Nullis
 int getWhoseTurn (Game g){
-	int whoseTurn = UNI_C;
+	int whoseTurn = NO_ONE;
     //special case for terra nullis
     if (g->currentTurn == -1) {
-        whoseTurn = UNI_C;
+        whoseTurn = NO_ONE;
     } 
 	//mod turn number by 3 as the turn rotates between 3 unis
 	else if (g->currentTurn % 3 == 0) {
