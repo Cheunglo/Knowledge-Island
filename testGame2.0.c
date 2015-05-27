@@ -529,7 +529,7 @@ void testGetARC (void) {
 
 	printf ("Testing getARC()...\n");
 
-	int player = 0;
+	//int player = 0;
 
 	int disciplines[19] = {STUDENT_BQN, STUDENT_MMONEY, STUDENT_MJ,\
                 STUDENT_MMONEY, STUDENT_MJ, STUDENT_BPS, STUDENT_MTV,\
@@ -554,7 +554,7 @@ void testGetARC (void) {
 
 	printf ("   Testing ARC building...\n");
 	//Tests that it will return an Arc Code
-	player = getWhoseTurn(g);
+	//player = getWhoseTurn(g);
 	a.actionCode = OBTAIN_ARC;
 	makeAction (g, a);
 	assert (getARC (g, a.destination) != VACANT_ARC);
