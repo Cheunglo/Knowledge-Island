@@ -40,19 +40,22 @@ action decideAction (Game g) {
 		"LRLRRLR","LRLRRL","LRRLL","LRRL","RLRL","RRLLRLL","RLRLRLR","LRRLRLRL",
 		"LRRLRL","LRRLR","RLRLL","RLRLR","RLRLRL","RLRLRLL","LRRLRLR","LRRLRL",
 	};
-	int i = 0;
+
 	int player = getWhoseTurn (g);
+
 	//int numARC = getARCs (g, player);
-	int numVacantARC = 0;
-	// counts number of vacant ARCs
+	int numCampus = getCampuses (g, player);
+	int numGo8 = getGO8s (g, player);
+
+	int i = 0;
+	int vacantARC = 0;
 	while (i < NUM_EDGES) {
-		if (getARC (g, allPaths[i]) == VACANT_ARC) {
-			numVacantARC++;
+		if (getARC (g, allPaths[i]) == 0) {
+			vacantARC++;
 		}
 		i++;
 	}
-	int numCampus = getCampuses (g, player);
-	int numGo8 = getGO8s (g,player);
+
 	// number of students for each discipline
 	int curDiscipline = 0;
 	int numDiscipline[MAX_DISCIPLINE];
@@ -66,7 +69,7 @@ action decideAction (Game g) {
 	nextAction.actionCode = PASS;
 
 	// determines which action is given priority
-	if (getMostARCs (g) != player && numVacantARC != 0) {
+	if (getMostARCs (g) != player && vacantARC != 0) {
 		printf ("\n---Attemping to OBTAIN_ARC---\n");
 		if (isActionCostMet (OBTAIN_ARC, numDiscipline)) {
 			// returns an action to build/obtain
@@ -78,14 +81,14 @@ action decideAction (Game g) {
 			// if possible
 			nextAction = retrainOrPass (g, OBTAIN_ARC, numDiscipline);
 		}
-	} else if (numCampus < 5) {
+	} else if (numCampus <= 5) {
 		printf ("\n---Attempting to BUILD_CAMPUS---\n");
 		if (isActionCostMet (BUILD_CAMPUS, numDiscipline)) {
 			nextAction = buildOrPass (g, BUILD_CAMPUS, allPaths);
 		} else {
 			nextAction = retrainOrPass (g, BUILD_CAMPUS, numDiscipline);
 		}
-	} else if (numGo8 < 3) {
+	} else if (numGo8 <= 3) {
 		printf ("\n---Attempting to BUILD_GO8---\n");
 		if (isActionCostMet ( BUILD_GO8, numDiscipline)) {
 			nextAction = buildOrPass (g, BUILD_GO8, allPaths);
