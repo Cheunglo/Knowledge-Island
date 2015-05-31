@@ -28,25 +28,25 @@ action decideAction (Game g) {
 
 	// all possible paths in the board
 	path allPaths[NUM_EDGES] = {
-    "L","R","RR","RRL","RRLR","RRLRL","RRLRLL","RRLRLLR","RRLRLLRL","RRLRLLRLR","RRLRLLRLRL","RRLRLLRLRLL",
-    "RRLRLLRLRLLR","RRLRLLRLRLLRL","RRLRLLRLRLLRLR","RRLRLLRLRLLRLRL","LR","LRL","LRLR","LRLRL","LRLRLR",
-    "LRLRLRR","LRLRLRRL","LRLRLRRLR","LRLRLRRLRL","LRLRLRRLRLR","LRLRLRRLRLRR","LRLRLRRLRLRRL",
-    "LRLRLRRLRLRRLR","LRLRLRRLRLRRLRL","RL","RRLL","RRLLRR","RRLLRLRR","RRLLRLRLR","RLRLRLRLR","LRRLRLRLRL",
-    "LRLRRLRLRL","LRLRRLRLL","LRLRRLL","LRLRR","LRR","RLL","RLR","RRLLL","RRLLR","RRLLRL","RRLLRLR",
-    "RRLLRLRL","RRLLRLRLL","RLRLRLRL","RLRLRLRLL","LRRLRLRLR","LRRLRLRLL","LRLRRLRLR","LRLRRLRL","LRLRRLR",
-    "LRLRRL","LRRLL","LRRL","RLRL","RRLLRLL","RLRLRLR","LRRLRLRL","LRRLRL","LRRLR","RLRLL","RLRLR","RLRLRL",
-    "RLRLRLL","LRRLRLR","LRRLRL",
-    };
+		"L","R","RR","RRL","RRLR","RRLRL","RRLRLL","RRLRLLR","RRLRLLRL","RRLRLLRLR","RRLRLLRLRL","RRLRLLRLRLL",
+		"RRLRLLRLRLLR","RRLRLLRLRLLRL","RRLRLLRLRLLRLR","RRLRLLRLRLLRLRL","LR","LRL","LRLR","LRLRL","LRLRLR",
+		"LRLRLRR","LRLRLRRL","LRLRLRRLR","LRLRLRRLRL","LRLRLRRLRLR","LRLRLRRLRLRR","LRLRLRRLRLRRL",
+		"LRLRLRRLRLRRLR","LRLRLRRLRLRRLRL","RL","RRLL","RRLLRR","RRLLRLRR","RRLLRLRLR","RLRLRLRLR","LRRLRLRLRL",
+		"LRLRRLRLRL","LRLRRLRLL","LRLRRLL","LRLRR","LRR","RLL","RLR","RRLLL","RRLLR","RRLLRL","RRLLRLR",
+		"RRLLRLRL","RRLLRLRLL","RLRLRLRL","RLRLRLRLL","LRRLRLRLR","LRRLRLRLL","LRLRRLRLR","LRLRRLRL","LRLRRLR",
+		"LRLRRL","LRRLL","LRRL","RLRL","RRLLRLL","RLRLRLR","LRRLRLRL","LRRLRL","LRRLR","RLRLL","RLRLR","RLRLRL",
+		"RLRLRLL","LRRLRLR","LRRLRL",
+	};
 
 	// arbitrary counters
-    int i = 0;
+	int i = 0;
 	int counter = 0;
 
-    // get player information
+	// get player information
     int player = getWhoseTurn (g);
 
-    // get ARCs information
-    //int numARC = getARCs (g, player);
+	// get ARCs information
+	//int numARC = getARCs (g, player);
 	int numVacantARC = 0;
 	while (counter < NUM_EDGES) {
 		if (getARC (g, allPaths[counter]) == VACANT_ARC) {
@@ -55,8 +55,8 @@ action decideAction (Game g) {
 		counter++;
 	}
 
-    int numCampus = getCampuses (g, player);
-    //int numGo8 = getGO8s (g,player);
+	 int numCampus = getCampuses (g, player);
+	//int numGo8 = getGO8s (g,player);
 
 	// number of students for each discipline
 	int curDiscipline = 0;
@@ -66,20 +66,20 @@ action decideAction (Game g) {
 		curDiscipline++;
 	}
 
-    // default action
+	// default action
     action nextAction;
     nextAction.actionCode = PASS;
 
 	if (numCampus > 5) {
 		printf ("\n---In makeGO8()--\n");
 		// make GO8
-		if (isActionCostMet ( BUILD_GO8, numDiscipline)){
+		if (isActionCostMet ( BUILD_GO8, numDiscipline)) {
 		    //while loop to try to find possible campus to build GO8 on
 			action isValidGO8;
 			isValidGO8.actionCode = BUILD_GO8;
-		    while (i < NUM_EDGES){
-				strcpy (isValidGO8.destination, allPaths[i]);
-		        if (isLegalAction (g, isValidGO8)){
+		    while (i < NUM_EDGES) {
+			strcpy (isValidGO8.destination, allPaths[i]);
+		        if (isLegalAction (g, isValidGO8)) {
 		            nextAction = isValidGO8;
 					i = NUM_EDGES;
 		        } else {
