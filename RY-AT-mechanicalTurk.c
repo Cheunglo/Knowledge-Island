@@ -40,26 +40,19 @@ action decideAction (Game g) {
 		"LRLRRLR","LRLRRL","LRRLL","LRRL","RLRL","RRLLRLL","RLRLRLR","LRRLRLRL",
 		"LRRLRL","LRRLR","RLRLL","RLRLR","RLRLRL","RLRLRLL","LRRLRLR","LRRLRL",
 	};
-
-	// arbitrary counter
 	int i = 0;
-
-	// get player information
 	int player = getWhoseTurn (g);
-
-	// get ARCs information
 	//int numARC = getARCs (g, player);
 	int numVacantARC = 0;
+	// counts number of vacant ARCs
 	while (i < NUM_EDGES) {
 		if (getARC (g, allPaths[i]) == VACANT_ARC) {
 			numVacantARC++;
 		}
 		i++;
 	}
-
 	int numCampus = getCampuses (g, player);
-	//int numGo8 = getGO8s (g,player);
-
+	int numGo8 = getGO8s (g,player);
 	// number of students for each discipline
 	int curDiscipline = 0;
 	int numDiscipline[MAX_DISCIPLINE];
@@ -72,31 +65,46 @@ action decideAction (Game g) {
 	action nextAction;
 	nextAction.actionCode = PASS;
 
-	if (numCampus > 5) {
-		printf ("\n---Attempting to BUILD_GO8---\n");
-		if (isActionCostMet ( BUILD_GO8, numDiscipline)) {
-			nextAction = buildOrPass (g, BUILD_GO8, allPaths);
+	// determines which action is given priority
+	if (getMostARCs (g) != player && numVacantARC != 0) {
+		printf ("\n---Attemping to OBTAIN_ARC---\n");
+		if (isActionCostMet (OBTAIN_ARC, numDiscipline)) {
+			// returns an action to build/obtain
+			// OR if no legal path/destination can be found then
+			// it will return the default action (PASS);
+			nextAction = buildOrPass (g, OBTAIN_ARC, allPaths);
 		} else {
-			nextAction = retrainOrPass (g, BUILD_GO8, numDiscipline);
+			// Same as above except it returns an action to retrain
+			// if possible
+			nextAction = retrainOrPass (g, OBTAIN_ARC, numDiscipline);
 		}
-	} else if (numVacantARC == 0) {
+	} else if (numCampus < 5) {
 		printf ("\n---Attempting to BUILD_CAMPUS---\n");
 		if (isActionCostMet (BUILD_CAMPUS, numDiscipline)) {
 			nextAction = buildOrPass (g, BUILD_CAMPUS, allPaths);
 		} else {
 			nextAction = retrainOrPass (g, BUILD_CAMPUS, numDiscipline);
 		}
-	} else if (numVacantARC != 0) {
-		printf ("\n---Attemping to OBTAIN_ARC---\n");
-		if (isActionCostMet (OBTAIN_ARC, numDiscipline)) {
-			nextAction = buildOrPass (g, OBTAIN_ARC, allPaths);
+	} else if (numGo8 < 3) {
+		printf ("\n---Attempting to BUILD_GO8---\n");
+		if (isActionCostMet ( BUILD_GO8, numDiscipline)) {
+			nextAction = buildOrPass (g, BUILD_GO8, allPaths);
 		} else {
-			nextAction = retrainOrPass (g, OBTAIN_ARC, numDiscipline);
+			nextAction = retrainOrPass (g, BUILD_GO8, numDiscipline);
+		}
+	} else {
+		printf ("\n---Attempting to START_SPINOFF---\n");
+		if (isActionCostMet (START_SPINOFF, numDiscipline)) {
+			nextAction.actionCode = START_SPINOFF;
+		} else {
+			nextAction = retrainOrPass (g, START_SPINOFF, numDiscipline);
 		}
 	}
 	return nextAction;
 }
 
+// determines whether the AI has enough students to
+// execute the action
 int isActionCostMet (int actionCode, int *numDiscipline) {
 
 	int isActionCostMet = FALSE;
@@ -119,6 +127,9 @@ int isActionCostMet (int actionCode, int *numDiscipline) {
 	return isActionCostMet;
 }
 
+// returns an action to build/obtain
+// OR if no legal path/destination can be found then
+// it will return the default action (PASS);
 action buildOrPass (Game g, int actionCode, path *allPaths) {
 
 	action determineAction;
@@ -127,6 +138,8 @@ action buildOrPass (Game g, int actionCode, path *allPaths) {
 	action isValidBuild;
 	isValidBuild.actionCode = actionCode;
 
+	// loops through the array of all possible paths in search
+	// for a legal path to build on
 	int i = 0;
 	while (i < NUM_EDGES){
 		strcpy (isValidBuild.destination, allPaths[i]);
@@ -141,6 +154,9 @@ action buildOrPass (Game g, int actionCode, path *allPaths) {
 	return determineAction;
 }
 
+// returns an action to retrain
+// OR if it is not "legal" to retrain then
+// it will return the default action (PASS);
 action retrainOrPass (Game g, int actionCode, int *numDiscipline) {
 
 	action determineAction;
@@ -160,6 +176,7 @@ action retrainOrPass (Game g, int actionCode, int *numDiscipline) {
 	return determineAction;
 }
 
+// determines what discipline requires students to execute action
 int determineRetrainTo (int actionCode, int *numDiscipline) {
 
 	int retrainTo = STUDENT_BPS;
@@ -183,6 +200,8 @@ int determineRetrainTo (int actionCode, int *numDiscipline) {
 			curDiscipline = STUDENT_MJ;
 			retrainTo_MAX = MAX_DISCIPLINE;
 		}
+		// loops through number of students in each discipline
+		// until it finds one that does not meet the action cost
 		while (curDiscipline < retrainTo_MAX) {
 			if (numDiscipline[curDiscipline] < 1) {
 				retrainTo = curDiscipline;
@@ -194,6 +213,7 @@ int determineRetrainTo (int actionCode, int *numDiscipline) {
 	return retrainTo;
 }
 
+// determines what discipline can be retrained
 int determineRetrainFrom (Game g, int actionCode, int *numDiscipline) {
 
 	int player = getWhoseTurn (g);
@@ -202,6 +222,12 @@ int determineRetrainFrom (Game g, int actionCode, int *numDiscipline) {
 	int rate = 0;
 
 	if (actionCode == OBTAIN_ARC) {
+		// loops through number of students in each discipline until
+		// it finds one that has the required amount.
+		// the loop will continue through the array of students in each
+		// discipline up until and including STUDENT_MMONEY
+		// thus, the order of priority that it is retrains from is
+		// MMONEY -> MTV -> MJ -> BQN -> BPS
 		while (curDiscipline < MAX_DISCIPLINE) {
 			rate = getExchangeRate (g, player, curDiscipline, STUDENT_MMONEY);
 			if (curDiscipline == STUDENT_BPS || curDiscipline == STUDENT_BQN) {
