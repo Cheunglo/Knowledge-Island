@@ -28,14 +28,16 @@ action decideAction (Game g) {
 
 	// all possible paths in the board
 	path allPaths[NUM_EDGES] = {
-		"L","R","RR","RRL","RRLR","RRLRL","RRLRLL","RRLRLLR","RRLRLLRL","RRLRLLRLR","RRLRLLRLRL","RRLRLLRLRLL",
-		"RRLRLLRLRLLR","RRLRLLRLRLLRL","RRLRLLRLRLLRLR","RRLRLLRLRLLRLRL","LR","LRL","LRLR","LRLRL","LRLRLR",
-		"LRLRLRR","LRLRLRRL","LRLRLRRLR","LRLRLRRLRL","LRLRLRRLRLR","LRLRLRRLRLRR","LRLRLRRLRLRRL",
-		"LRLRLRRLRLRRLR","LRLRLRRLRLRRLRL","RL","RRLL","RRLLRR","RRLLRLRR","RRLLRLRLR","RLRLRLRLR","LRRLRLRLRL",
-		"LRLRRLRLRL","LRLRRLRLL","LRLRRLL","LRLRR","LRR","RLL","RLR","RRLLL","RRLLR","RRLLRL","RRLLRLR",
-		"RRLLRLRL","RRLLRLRLL","RLRLRLRL","RLRLRLRLL","LRRLRLRLR","LRRLRLRLL","LRLRRLRLR","LRLRRLRL","LRLRRLR",
-		"LRLRRL","LRRLL","LRRL","RLRL","RRLLRLL","RLRLRLR","LRRLRLRL","LRRLRL","LRRLR","RLRLL","RLRLR","RLRLRL",
-		"RLRLRLL","LRRLRLR","LRRLRL",
+		"L","R","RR","RRL","RRLR","RRLRL","RRLRLL","RRLRLLR","RRLRLLRL","RRLRLLRLR",
+		"RRLRLLRLRL","RRLRLLRLRLL","RRLRLLRLRLLR","RRLRLLRLRLLRL","RRLRLLRLRLLRLR",
+		"RRLRLLRLRLLRLRL","LR","LRL","LRLR","LRLRL","LRLRLR","LRLRLRR","LRLRLRRL",
+		"LRLRLRRLR","LRLRLRRLRL","LRLRLRRLRLR","LRLRLRRLRLRR","LRLRLRRLRLRRL",
+		"LRLRLRRLRLRRLR","LRLRLRRLRLRRLRL","RL","RRLL","RRLLRR","RRLLRLRR","RRLLRLRLR",
+		"RLRLRLRLR","LRRLRLRLRL","LRLRRLRLRL","LRLRRLRLL","LRLRRLL","LRLRR","LRR",
+		"RLL","RLR","RRLLL","RRLLR","RRLLRL","RRLLRLR","RRLLRLRL","RRLLRLRLL",
+		"RLRLRLRL","RLRLRLRLL","LRRLRLRLR","LRRLRLRLL","LRLRRLRLR","LRLRRLRL",
+		"LRLRRLR","LRLRRL","LRRLL","LRRL","RLRL","RRLLRLL","RLRLRLR","LRRLRLRL",
+		"LRRLRL","LRRLR","RLRLL","RLRLR","RLRLRL","RLRLRLL","LRRLRLR","LRRLRL",
 	};
 
 	// arbitrary counters
@@ -43,7 +45,7 @@ action decideAction (Game g) {
 	int counter = 0;
 
 	// get player information
-    int player = getWhoseTurn (g);
+	int player = getWhoseTurn (g);
 
 	// get ARCs information
 	//int numARC = getARCs (g, player);
@@ -55,7 +57,7 @@ action decideAction (Game g) {
 		counter++;
 	}
 
-	 int numCampus = getCampuses (g, player);
+	int numCampus = getCampuses (g, player);
 	//int numGo8 = getGO8s (g,player);
 
 	// number of students for each discipline
@@ -67,25 +69,25 @@ action decideAction (Game g) {
 	}
 
 	// default action
-    action nextAction;
-    nextAction.actionCode = PASS;
+	action nextAction;
+	nextAction.actionCode = PASS;
 
 	if (numCampus > 5) {
 		printf ("\n---In makeGO8()--\n");
 		// make GO8
 		if (isActionCostMet ( BUILD_GO8, numDiscipline)) {
-		    //while loop to try to find possible campus to build GO8 on
+			//while loop to try to find possible campus to build GO8 on
 			action isValidGO8;
 			isValidGO8.actionCode = BUILD_GO8;
-		    while (i < NUM_EDGES) {
-			strcpy (isValidGO8.destination, allPaths[i]);
-		        if (isLegalAction (g, isValidGO8)) {
-		            nextAction = isValidGO8;
+			while (i < NUM_EDGES){
+				strcpy (isValidGO8.destination, allPaths[i]);
+				if (isLegalAction (g, isValidGO8)){
+					nextAction = isValidGO8;
 					i = NUM_EDGES;
-		        } else {
-		        	i++;
+				} else {
+					i++;
 				}
-		    }
+			}
 		} else if (canRetrain (g, BUILD_GO8, numDiscipline)) {
 			action isValidRetrain;
 			isValidRetrain.actionCode = RETRAIN_STUDENTS;
@@ -98,19 +100,19 @@ action decideAction (Game g) {
 	} else if (numVacantARC == 0) {
 		printf ("\n---In makeCampus()--\n");
 		// make Campuses
-		if (isActionCostMet (BUILD_CAMPUS, numDiscipline)){
-		    //while loop to try to find possible vertex to build campus on
+		if (isActionCostMet (BUILD_CAMPUS, numDiscipline)) {
+			//while loop to try to find possible vertex to build campus on
 			action isValidCampus;
 			isValidCampus.actionCode = BUILD_CAMPUS;
-		    while (i < NUM_EDGES){
+			while (i < NUM_EDGES){
 				strcpy (isValidCampus.destination, allPaths[i]);
-		        if (isLegalAction (g, isValidCampus)){
-		            nextAction = isValidCampus;
+				if (isLegalAction (g, isValidCampus)){
+					nextAction = isValidCampus;
 					i = NUM_EDGES;
-		        } else {
-		        	i++;
+				} else {
+					i++;
 				}
-		    }
+			}
 		} else if (canRetrain (g, BUILD_CAMPUS, numDiscipline)) {
 			action isValidRetrain;
 			isValidRetrain.actionCode = RETRAIN_STUDENTS;
@@ -124,18 +126,18 @@ action decideAction (Game g) {
 		printf ("\n---In makeARC()--\n");
 		// make arcs
 		if (isActionCostMet (OBTAIN_ARC, numDiscipline)) {
-		    //while loop to try to find possible path to build arc on
+			//while loop to try to find possible path to build arc on
 			action isValidARC;
 			isValidARC.actionCode = OBTAIN_ARC;
-		    while (i < NUM_EDGES){
+			while (i < NUM_EDGES){
 				strcpy (isValidARC.destination, allPaths[i]);
-		        if (isLegalAction (g, isValidARC)){
-		            nextAction = isValidARC;
+				if (isLegalAction (g, isValidARC)){
+					nextAction = isValidARC;
 					i = NUM_EDGES;
-		        } else {
-		        	i++;
+				} else {
+					i++;
 				}
-		    }
+			}
 		} else if (canRetrain (g, OBTAIN_ARC, numDiscipline)) {
 			action isValidRetrain;
 			isValidRetrain.actionCode = RETRAIN_STUDENTS;
@@ -194,7 +196,7 @@ int canRetrain (Game g, int actionCode, int *numDiscipline) {
 	if (actionCode == OBTAIN_ARC) {
 		if (numBPS > rateBPS || numBQN > rateBQN || numMJ >= rateMJ ||
 			numMTV >= rateMTV || numMMONEY >= rateMMONEY) {
-			canRetrain = TRUE;
+				canRetrain = TRUE;
 		}
 	} else if (actionCode == BUILD_CAMPUS) {
 		if (numBPS > rateBPS || numBQN > rateBQN || numMJ > rateMJ ||
