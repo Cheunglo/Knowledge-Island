@@ -20,7 +20,8 @@
 #define MAX_DISCIPLINE 6
 
 int isActionCostMet (int actionCode, int *numDiscipline);
-int canRetrain (Game g, int actionCode, int *numDiscipline);
+action buildOrPass (Game g, int actionCode, path *allPaths);
+action retrainOrPass (Game g, int actionCode, int *numDiscipline);
 int determineRetrainTo (int actionCode, int *numDiscipline);
 int determineRetrainFrom (Game g, int actionCode, int *numDiscipline);
 
@@ -40,9 +41,8 @@ action decideAction (Game g) {
 		"LRRLRL","LRRLR","RLRLL","RLRLR","RLRLRL","RLRLRLL","LRRLRLR","LRRLRL",
 	};
 
-	// arbitrary counters
+	// arbitrary counter
 	int i = 0;
-	int counter = 0;
 
 	// get player information
 	int player = getWhoseTurn (g);
@@ -50,11 +50,11 @@ action decideAction (Game g) {
 	// get ARCs information
 	//int numARC = getARCs (g, player);
 	int numVacantARC = 0;
-	while (counter < NUM_EDGES) {
-		if (getARC (g, allPaths[counter]) == VACANT_ARC) {
+	while (i < NUM_EDGES) {
+		if (getARC (g, allPaths[i]) == VACANT_ARC) {
 			numVacantARC++;
 		}
-		counter++;
+		i++;
 	}
 
 	int numCampus = getCampuses (g, player);
@@ -73,79 +73,25 @@ action decideAction (Game g) {
 	nextAction.actionCode = PASS;
 
 	if (numCampus > 5) {
-		printf ("\n---In makeGO8()--\n");
-		// make GO8
+		printf ("\n---Attempting to BUILD_GO8---\n");
 		if (isActionCostMet ( BUILD_GO8, numDiscipline)) {
-			//while loop to try to find possible campus to build GO8 on
-			action isValidGO8;
-			isValidGO8.actionCode = BUILD_GO8;
-			while (i < NUM_EDGES){
-				strcpy (isValidGO8.destination, allPaths[i]);
-				if (isLegalAction (g, isValidGO8)){
-					nextAction = isValidGO8;
-					i = NUM_EDGES;
-				} else {
-					i++;
-				}
-			}
-		} else if (canRetrain (g, BUILD_GO8, numDiscipline)) {
-			action isValidRetrain;
-			isValidRetrain.actionCode = RETRAIN_STUDENTS;
-			isValidRetrain.disciplineTo = determineRetrainTo (BUILD_GO8, numDiscipline);
-			isValidRetrain.disciplineFrom = determineRetrainFrom (g, BUILD_GO8, numDiscipline);
-			if (isLegalAction (g, isValidRetrain)) {
-				nextAction = isValidRetrain;
-			}
+			nextAction = buildOrPass (g, BUILD_GO8, allPaths);
+		} else {
+			nextAction = retrainOrPass (g, BUILD_GO8, numDiscipline);
 		}
 	} else if (numVacantARC == 0) {
-		printf ("\n---In makeCampus()--\n");
-		// make Campuses
+		printf ("\n---Attempting to BUILD_CAMPUS---\n");
 		if (isActionCostMet (BUILD_CAMPUS, numDiscipline)) {
-			//while loop to try to find possible vertex to build campus on
-			action isValidCampus;
-			isValidCampus.actionCode = BUILD_CAMPUS;
-			while (i < NUM_EDGES){
-				strcpy (isValidCampus.destination, allPaths[i]);
-				if (isLegalAction (g, isValidCampus)){
-					nextAction = isValidCampus;
-					i = NUM_EDGES;
-				} else {
-					i++;
-				}
-			}
-		} else if (canRetrain (g, BUILD_CAMPUS, numDiscipline)) {
-			action isValidRetrain;
-			isValidRetrain.actionCode = RETRAIN_STUDENTS;
-			isValidRetrain.disciplineTo = determineRetrainTo (BUILD_CAMPUS, numDiscipline);
-			isValidRetrain.disciplineFrom = determineRetrainFrom (g, BUILD_CAMPUS, numDiscipline);
-			if (isLegalAction (g, isValidRetrain)) {
-				nextAction = isValidRetrain;
-			}
+			nextAction = buildOrPass (g, BUILD_CAMPUS, allPaths);
+		} else {
+			nextAction = retrainOrPass (g, BUILD_CAMPUS, numDiscipline);
 		}
 	} else if (numVacantARC != 0) {
-		printf ("\n---In makeARC()--\n");
-		// make arcs
+		printf ("\n---Attemping to OBTAIN_ARC---\n");
 		if (isActionCostMet (OBTAIN_ARC, numDiscipline)) {
-			//while loop to try to find possible path to build arc on
-			action isValidARC;
-			isValidARC.actionCode = OBTAIN_ARC;
-			while (i < NUM_EDGES){
-				strcpy (isValidARC.destination, allPaths[i]);
-				if (isLegalAction (g, isValidARC)){
-					nextAction = isValidARC;
-					i = NUM_EDGES;
-				} else {
-					i++;
-				}
-			}
-		} else if (canRetrain (g, OBTAIN_ARC, numDiscipline)) {
-			action isValidRetrain;
-			isValidRetrain.actionCode = RETRAIN_STUDENTS;
-			isValidRetrain.disciplineTo = determineRetrainTo (OBTAIN_ARC, numDiscipline);
-			isValidRetrain.disciplineFrom = determineRetrainFrom (g, OBTAIN_ARC, numDiscipline);
-			if (isLegalAction (g, isValidRetrain)) {
-				nextAction = isValidRetrain;
-			}
+			nextAction = buildOrPass (g, OBTAIN_ARC, allPaths);
+		} else {
+			nextAction = retrainOrPass (g, OBTAIN_ARC, numDiscipline);
 		}
 	}
 	return nextAction;
@@ -173,49 +119,45 @@ int isActionCostMet (int actionCode, int *numDiscipline) {
 	return isActionCostMet;
 }
 
-int canRetrain (Game g, int actionCode, int *numDiscipline) {
+action buildOrPass (Game g, int actionCode, path *allPaths) {
 
-	int canRetrain = FALSE;
-	int player = getWhoseTurn (g);
+	action determineAction;
+	determineAction.actionCode = PASS;
 
-	// exchange rates for retraining based on retraining centres
-	// we are only concerned with disciplineFrom
-	// thus the last argument, disciplineTo is unimportant
-	int rateBPS = getExchangeRate (g, player, STUDENT_BPS, STUDENT_MMONEY);
-	int rateBQN = getExchangeRate (g, player, STUDENT_BQN, STUDENT_MMONEY);
-	int rateMJ = getExchangeRate (g, player, STUDENT_MJ, STUDENT_MMONEY);
-	int rateMTV = getExchangeRate (g, player, STUDENT_MTV, STUDENT_MMONEY);
-	int rateMMONEY = getExchangeRate (g, player, STUDENT_MMONEY, STUDENT_MMONEY);
+	action isValidBuild;
+	isValidBuild.actionCode = actionCode;
 
-	int numBPS = numDiscipline[STUDENT_BPS];
-	int numBQN = numDiscipline[STUDENT_BQN];
-	int numMJ = numDiscipline[STUDENT_MJ];
-	int numMTV = numDiscipline[STUDENT_MTV];
-	int numMMONEY = numDiscipline[STUDENT_MMONEY];
-
-	if (actionCode == OBTAIN_ARC) {
-		if (numBPS > rateBPS || numBQN > rateBQN || numMJ >= rateMJ ||
-			numMTV >= rateMTV || numMMONEY >= rateMMONEY) {
-				canRetrain = TRUE;
-		}
-	} else if (actionCode == BUILD_CAMPUS) {
-		if (numBPS > rateBPS || numBQN > rateBQN || numMJ > rateMJ ||
-			numMTV > rateMTV || numMMONEY >= rateMMONEY) {
-			canRetrain = TRUE;
-		}
-	} else if (actionCode == BUILD_GO8)	{
-		if (numBPS >= rateBPS || numBQN >= rateBQN || numMJ > rateMJ+1 ||
-			numMTV >= rateMTV || numMMONEY > rateMMONEY+2) {
-			canRetrain = TRUE;
-		}
-	} else if (actionCode == START_SPINOFF) {
-		if (numBPS >= rateBPS || numBQN >= rateBQN || numMJ > rateMJ ||
-			numMTV > rateMTV || numMMONEY > rateMMONEY) {
-			canRetrain = TRUE;
+	int i = 0;
+	while (i < NUM_EDGES){
+		strcpy (isValidBuild.destination, allPaths[i]);
+		if (isLegalAction (g, isValidBuild)){
+			determineAction = isValidBuild;
+			i = NUM_EDGES;
+		} else {
+			i++;
 		}
 	}
 
-	return canRetrain;
+	return determineAction;
+}
+
+action retrainOrPass (Game g, int actionCode, int *numDiscipline) {
+
+	action determineAction;
+	determineAction.actionCode = PASS;
+
+	action isValidRetrain;
+	isValidRetrain.actionCode = RETRAIN_STUDENTS;
+
+	isValidRetrain.actionCode = RETRAIN_STUDENTS;
+	isValidRetrain.disciplineTo = determineRetrainTo (actionCode, numDiscipline);
+	isValidRetrain.disciplineFrom = determineRetrainFrom (g, actionCode, numDiscipline);
+
+	if (isLegalAction (g, isValidRetrain)) {
+		determineAction = isValidRetrain;
+	}
+
+	return determineAction;
 }
 
 int determineRetrainTo (int actionCode, int *numDiscipline) {
